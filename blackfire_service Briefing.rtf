@@ -1,0 +1,34 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2867
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+{\*\expandedcolortbl;;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww29520\viewh18080\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Briefing Blackfire_service\
+\
+- Es soll ein Webapp-Service entwickelt werden der sich an {\field{\*\fldinst{HYPERLINK "https://simplywall.st/"}}{\fldrslt https://simplywall.st/}} und an {\field{\*\fldinst{HYPERLINK "https://www.theinformation.com/"}}{\fldrslt https://www.theinformation.com/}} anlehnt. \
+\
+- Der Service soll dazu dienen, dass genug Informationen vorhanden sind, um in Aktien zu investieren, die eine hohes Wachstumspotential haben. Im besten Fall, findet man Aktien, die einen enormen Hebel haben werden. So z.b., wenn man sehr fr\'fch in Tesla oder Nvidia investiert h\'e4tte. Vor allem sind auch Firmen interessant, die bald einen IPO machen werden. Aber auch Aktien, die stark gefallen sind und potential haben wieder stark zu steigen. Der Service soll so viele Informationen wie m\'f6glich sammeln und dann mittels AI die richtigen Zeitpunkte analysieren und Hinweise darauf geben. In meiner aktuellen Datenbank befinden sich bereits \'fcber 1500 Firmen und Aktien. Diese Datenbank w\'e4chst t\'e4glich. Ich ben\'f6tige ein System, mit dem unterschiedliche Methoden angeboten werden, um die richtigen Entscheidungen zu treffen. Das System soll zudem Funktionen bekommen, um den richtigen Investitionszeitpunkt fest zu halten und vor allem den richtigen Kurs. Wenn dann investiert wurde, sollen die Investitionen mit aufgenommen werden und diese sollen mit dem System verwaltet werden. Also wann wurde zu welchem Kurs gekauft, wie ist der Kursverlauf und wie ist damit die Entwicklung der Investition. Zudem soll der Ausstiegszeitpunkt ebenso verwaltet werden. Bei welchem Kurs soll verkauft werden. F\'fcr alle Transaktionsfunktionen soll es ein Notification System geben. \
+\
+Es werden unterschiedliche \'dcbersichten ben\'f6tigt:\
+- Aktien\'fcbersichten mit unterschiedlichen Filterm\'f6glichkeiten. So z.B. in Tabellenform, mit der M\'f6glichkeiten \'fcber Filter die Sichten zu ver\'e4ndern. Die \'dcbersichten sollen je Aktie auch interaktive Graphen enthalten, die zum Beispiel den Kursverlauf \'fcber den letzten Tag, die letzte Woche, den letzten Monat oder die letzen 12 Monate darstellen kann.\
+- Detailseite f\'fcr jede Aktie, mit allen Details und allen relevanten related Informationen. Hierbei vor allem auch aus vielen externen Quellen, die dann auf der Detailseite zusammengef\'fchrt werden. In dieser Darstellung sollten z.B. die Kursverl\'e4ufe einzeln dargestellt werden und ebenfalls sehr interaktiv sein. Mit interaktiv ist gemeint, dass mit dem Mauszeiger \'fcber die Verlaufskurve gegangen werden kann und dann an dem Punkt der jeweils dortige Kurs mit angezeigt wird. Auch angezeigt werden sollen in der Einzel\'fcbersicht, die ganzen Basisdaten des Unternehmens. Ebenso die Finanzkennzahlen \'fcber die letzten Jahre - in Tabellenform. \
+- Siehe hierzu auch die Services von simplywall.st und theinformation.com\
+- Es sollen bei allen Firmen/Aktien, die an B\'f6rsen gehandelt werden, live die aktuellen B\'f6rsenkurse angezeigt werden. Zudem alle anderen \'fcblichen Werte, wie z.b. 52Wochen High und Low, Transaktionsvolumen, Marktkapitalisierung etc. Diese m\'fcssen jedoch nicht dauerhaft in der Datenbank gespeichert werden\
+- Ich m\'f6chte \'fcber die Zeit den Umfang deutlich ausbauen und hierf\'fcr soll eine technische- und architektonische Grundlage geschaffen werden\
+\
+Datengrundlage:\
+- Die Notion-DB dient als Informationsbasis\
+- Die Firmennamen werden teilweise durch Aktiensymbole, WKN und ISIN Nummern erg\'e4nzt. Leider sind die Informationen nicht bei allen Firmen vorhanden. Die Webapp soll im Hintergrund \'fcber Chatgpt, Claude und Gemini und auch weiteren Diensten im Netz nach den entsprechenden Eintragungen suchen. Wenn welche gefunden wurden, sollen diese auch in die Notion DB eingetragen werden. \
+- Je Firma/Aktie sollen \'fcber die Zeit immer mehr Informationen gesammelt werden. Alles was t\'e4glich an neuen Informationen gefunden wird, soll gespeichert werden. Erstelle hierzu ein Datenbank-Konzept, wie eine solche Datenhaltung aussehen kann.\
+\
+Ausgestaltung:\
+- Neben dem normalen User Front-End, m\'f6chte ich zus\'e4tzlich ein Backend-System, mit dem ich alle Einstellungen und das System steuern kann und f\'fcr den Service Einstellungen vornehmen kann. \
+- Der Service soll f\'fcr viele Tausende User konzipiert werden.\
+- Als Basis habe ich die Daten aus dem Projekt Blackfire_automation. Diese Datenquelle soll als Basis dienen und als Beispiel. In meinem Fall, soll sie die Grundlage sein. F\'fcr andere Nutzer k\'f6nnen aber ganz andere Daten genutzt werden. Die Struktur soll aber in dieser Form als Basis angelegt werden. \
+\
+\
+\
+\
+}

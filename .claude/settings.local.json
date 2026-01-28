@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:simplywall.st)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:support.simplywall.st)",
+      "Bash(tree:*)",
+      "Bash(chmod:*)"
+    ]
+  }
+}

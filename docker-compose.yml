@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  # Redis for caching and job queue
+  redis:
+    image: redis:7-alpine
+    container_name: blackfire-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  # MeiliSearch for full-text search
+  meilisearch:
+    image: getmeili/meilisearch:v1.10
+    container_name: blackfire-meilisearch
+    ports:
+      - '7700:7700'
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: masterKey
+    volumes:
+      - meilisearch_data:/meili_data
+
+  # PostgreSQL (if not using Supabase Cloud)
+  # Uncomment if you want local PostgreSQL + TimescaleDB
+  # postgres:
+  #   image: timescale/timescaledb:latest-pg16
+  #   container_name: blackfire-postgres
+  #   ports:
+  #     - '5432:5432'
+  #   environment:
+  #     POSTGRES_USER: postgres
+  #     POSTGRES_PASSWORD: postgres
+  #     POSTGRES_DB: blackfire
+  #   volumes:
+  #     - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  redis_data:
+  meilisearch_data:
+  # postgres_data:

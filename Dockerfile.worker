@@ -1,0 +1,29 @@
+# Dockerfile for background worker
+
+FROM node:20-alpine
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy package files
+COPY package.json pnpm-lock.yaml* ./
+
+# Install dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY . .
+
+# Build if needed (for TypeScript)
+RUN pnpm build:worker || echo "No worker build script"
+
+# Create non-root user
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 worker
+
+USER worker
+
+# Run worker
+CMD ["node", "dist/worker/index.js"]
