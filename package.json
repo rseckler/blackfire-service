@@ -2,12 +2,7 @@
   "name": "blackfire-service",
   "version": "0.1.0",
   "private": true,
-{                                                                                                                                                                                                   
-    "name": "blackfire-service",                                                                                                                                                                      
-    "version": "0.1.0",                                                                                                                                                                               
-    "private": true,                                                                                                                                                                                  
-    "packageManager": "pnpm@8.15.0",                                                                                                                                                                  
-    "scripts": {
+  "packageManager": "pnpm@8.15.0",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -100,4 +95,3 @@
     "pnpm": ">=8.0.0"
   }
 }
-"packageManager": "pnpm@8.15.0"
