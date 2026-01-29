@@ -231,23 +231,26 @@ export default function StocksPage() {
                 </div>
 
                 {/* Table wrapper with fixed positioning */}
-                <div className="relative">
+                <div className="relative border rounded-md">
                   {/* Table container with fixed height and scrollbars */}
                   <div
                     id="table-container"
-                    className="rounded-md border overflow-scroll relative"
-                    style={{ height: '500px', width: '100%' }}
+                    className="overflow-scroll relative"
+                    style={{
+                      height: '500px',
+                      width: '100%',
+                      display: 'block',
+                    }}
                     onScroll={handleTableScroll}
                   >
-                    <Table className="relative">
-                      <TableHeader>
-                        <TableRow className="bg-background"
-                          style={{
-                            position: 'sticky',
-                            top: 0,
-                            zIndex: 20,
-                          }}
-                        >
+                    <Table style={{ position: 'relative', display: 'table' }}>
+                      <TableHeader style={{
+                        position: 'sticky',
+                        top: 0,
+                        zIndex: 20,
+                        backgroundColor: 'hsl(var(--background))',
+                      }}>
+                        <TableRow>
                         {/* Core Fields - always shown first */}
                         <TableHead
                           className="min-w-[250px] border-r"

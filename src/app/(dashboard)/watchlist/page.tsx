@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Trash2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface WatchlistItem {
   id: string
@@ -41,11 +42,26 @@ export default function WatchlistPage() {
 
   const fetchWatchlist = async () => {
     try {
-      const response = await fetch('/api/watchlist')
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        console.error('No session found')
+        setLoading(false)
+        return
+      }
+
+      const response = await fetch('/api/watchlist', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      })
       const data = await response.json()
 
       if (response.ok) {
         setWatchlist(data.watchlist || [])
+      } else {
+        console.error('Watchlist API error:', data)
       }
     } catch (error) {
       console.error('Failed to fetch watchlist:', error)
@@ -58,8 +74,19 @@ export default function WatchlistPage() {
     if (!confirm('Remove this company from your watchlist?')) return
 
     try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        alert('Please log in to manage your watchlist')
+        return
+      }
+
       const response = await fetch(`/api/watchlist?company_id=${companyId}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
       })
 
       if (response.ok) {
