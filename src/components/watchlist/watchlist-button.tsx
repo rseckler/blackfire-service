@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Star } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 interface WatchlistButtonProps {
   companyId: string
@@ -27,7 +28,16 @@ export function WatchlistButton({
 
   const checkWatchlistStatus = async () => {
     try {
-      const response = await fetch('/api/watchlist')
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) return
+
+      const response = await fetch('/api/watchlist', {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      })
       const data = await response.json()
 
       if (response.ok) {
@@ -49,10 +59,22 @@ export function WatchlistButton({
     setLoading(true)
 
     try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        alert('Please log in to manage your watchlist')
+        setLoading(false)
+        return
+      }
+
       if (isInWatchlist) {
         // Remove from watchlist
         const response = await fetch(`/api/watchlist?company_id=${companyId}`, {
           method: 'DELETE',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
         })
 
         if (response.ok) {
@@ -64,7 +86,10 @@ export function WatchlistButton({
         // Add to watchlist
         const response = await fetch('/api/watchlist', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({ company_id: companyId }),
         })
 

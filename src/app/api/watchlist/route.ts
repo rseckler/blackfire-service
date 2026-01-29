@@ -1,17 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
+
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+// Helper to get user from request
+async function getUserFromRequest(request: NextRequest) {
+  const authHeader = request.headers.get('authorization')
+  if (!authHeader) return null
+
+  const token = authHeader.replace('Bearer ', '')
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    global: { headers: { Authorization: `Bearer ${token}` } }
+  })
+
+  const { data: { user }, error } = await supabase.auth.getUser()
+  if (error || !user) return null
+
+  return { user, supabase }
+}
 
 // GET /api/watchlist - Get user's watchlist
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
+    const result = await getUserFromRequest(request)
+    if (!result) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    const { user, supabase } = result
 
     // Get watchlist with company details
     const { data, error } = await supabase
@@ -55,15 +72,12 @@ export async function GET() {
 // POST /api/watchlist - Add to watchlist
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
+    const result = await getUserFromRequest(request)
+    if (!result) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { user, supabase } = result
     const body = await request.json()
     const { company_id, notes } = body
 
@@ -114,15 +128,12 @@ export async function POST(request: NextRequest) {
 // DELETE /api/watchlist - Remove from watchlist
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient()
-
-    // Get current user
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-
-    if (userError || !user) {
+    const result = await getUserFromRequest(request)
+    if (!result) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const { user, supabase } = result
     const { searchParams } = new URL(request.url)
     const company_id = searchParams.get('company_id')
 
