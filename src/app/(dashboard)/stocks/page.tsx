@@ -46,25 +46,12 @@ export default function StocksPage() {
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [allExtraDataFields, setAllExtraDataFields] = useState<string[]>([])
-  const [tableScroll, setTableScroll] = useState(0)
   const [showAll, setShowAll] = useState(false)
 
   const limit = showAll ? 10000 : 50
 
   // Core fields that are always shown first
   const coreFields = ['name', 'symbol', 'wkn', 'isin']
-
-  // Sync scroll between table container and scrollbar helper
-  const handleTableScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    setTableScroll(e.currentTarget.scrollLeft)
-  }
-
-  const handleScrollbarScroll = (e: React.UIEvent<HTMLDivElement>) => {
-    const tableContainer = document.getElementById('table-container')
-    if (tableContainer) {
-      tableContainer.scrollLeft = e.currentTarget.scrollLeft
-    }
-  }
 
   useEffect(() => {
     fetchCompanies()
@@ -225,148 +212,216 @@ export default function StocksPage() {
               </div>
             ) : (
               <>
-                {/* Info banner for wide table */}
-                <div className="bg-muted/50 rounded-md p-3 text-sm text-muted-foreground border flex items-center justify-between">
-                  <span>💡 Table header and Name column stay fixed while scrolling. Viewing {coreFields.length + allExtraDataFields.length} columns total.</span>
+                {/* Info banner */}
+                <div className="bg-muted/50 rounded-md p-3 text-sm text-muted-foreground border flex items-center justify-between mb-4">
+                  <span>💡 Viewing {coreFields.length + allExtraDataFields.length} columns total. Header stays fixed, content scrolls.</span>
                 </div>
 
-                {/* Table wrapper with fixed positioning */}
-                <div className="relative border rounded-md">
-                  {/* Table container with fixed height and scrollbars */}
-                  <div
-                    id="table-container"
-                    className="overflow-scroll relative"
-                    style={{
-                      height: '500px',
-                      width: '100%',
-                      display: 'block',
-                    }}
-                    onScroll={handleTableScroll}
-                  >
-                    <Table style={{ position: 'relative', display: 'table' }}>
-                      <TableHeader style={{
-                        position: 'sticky',
-                        top: 0,
-                        zIndex: 20,
-                        backgroundColor: 'hsl(var(--background))',
-                      }}>
-                        <TableRow>
+                {/* Table with fixed header - single scrollable container */}
+                <div
+                  className="border rounded-md"
+                  style={{
+                    height: '600px',
+                    overflow: 'scroll',
+                    position: 'relative',
+                  }}
+                >
+                  <table style={{
+                    width: '100%',
+                    borderCollapse: 'collapse',
+                    position: 'relative',
+                  }}>
+                    <thead style={{
+                      position: 'sticky',
+                      top: 0,
+                      zIndex: 20,
+                      backgroundColor: 'hsl(var(--background))',
+                      borderBottom: '1px solid hsl(var(--border))',
+                    }}>
+                      <tr>
                         {/* Core Fields - always shown first */}
-                        <TableHead
-                          className="min-w-[250px] border-r"
-                          style={{
-                            position: 'sticky',
-                            left: 0,
-                            zIndex: 30,
-                            backgroundColor: 'hsl(var(--background))',
-                          }}
-                        >
+                        <th style={{
+                          position: 'sticky',
+                          left: 0,
+                          zIndex: 30,
+                          backgroundColor: 'hsl(var(--background))',
+                          minWidth: '250px',
+                          padding: '12px 16px',
+                          textAlign: 'left',
+                          fontWeight: 500,
+                          fontSize: '0.875rem',
+                          borderRight: '1px solid hsl(var(--border))',
+                        }}>
                           <button
-                            className="flex items-center space-x-1 hover:text-foreground w-full text-left"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleSort('name')
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                              background: 'none',
+                              border: 'none',
+                              cursor: 'pointer',
+                              padding: 0,
+                              width: '100%',
+                              textAlign: 'left',
                             }}
+                            onClick={() => handleSort('name')}
                             type="button"
                           >
                             <span>Name</span>
-                            {sortBy === 'name' && (
-                              <ArrowUpDown className="h-4 w-4 ml-1" />
-                            )}
+                            {sortBy === 'name' && <ArrowUpDown className="h-4 w-4" />}
                           </button>
-                        </TableHead>
-                        <SortableHeader column="symbol" label="Symbol" className="min-w-[100px]" />
-                        <SortableHeader column="wkn" label="WKN" className="min-w-[100px]" />
-                        <SortableHeader column="isin" label="ISIN" className="min-w-[120px]" />
+                        </th>
+
+                        {/* Other core fields */}
+                        {['symbol', 'wkn', 'isin'].map(field => (
+                          <th key={field} style={{
+                            minWidth: '120px',
+                            padding: '12px 16px',
+                            textAlign: 'left',
+                            fontWeight: 500,
+                            fontSize: '0.875rem',
+                          }}>
+                            <button
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: 0,
+                              }}
+                              onClick={() => handleSort(field)}
+                              type="button"
+                            >
+                              <span>{field.toUpperCase()}</span>
+                              {sortBy === field && <ArrowUpDown className="h-4 w-4" />}
+                            </button>
+                          </th>
+                        ))}
 
                         {/* Dynamic extra_data fields */}
                         {allExtraDataFields.map(field => {
-                          // Determine appropriate width based on field type
                           const isPrice = field.includes('Price') || field.includes('$')
                           const isLongText = field === 'Profile' || field.includes('Info')
-                          const minWidth = isLongText ? 'min-w-[300px]' : isPrice ? 'min-w-[120px]' : 'min-w-[150px]'
-                          const align = isPrice || field.includes('Volume') || field.includes('Cap') ? 'text-right' : ''
+                          const minWidth = isLongText ? '300px' : isPrice ? '120px' : '150px'
+                          const align = isPrice || field.includes('Volume') || field.includes('Cap') ? 'right' : 'left'
 
                           return (
-                            <SortableHeader
-                              key={field}
-                              column={field}
-                              label={field.replace(/_/g, ' ')}
-                              className={`${minWidth} ${align}`}
-                            />
+                            <th key={field} style={{
+                              minWidth,
+                              padding: '12px 16px',
+                              textAlign: align,
+                              fontWeight: 500,
+                              fontSize: '0.875rem',
+                            }}>
+                              <button
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  background: 'none',
+                                  border: 'none',
+                                  cursor: 'pointer',
+                                  padding: 0,
+                                }}
+                                onClick={() => handleSort(field)}
+                                type="button"
+                              >
+                                <span>{field.replace(/_/g, ' ')}</span>
+                                {sortBy === field && <ArrowUpDown className="h-4 w-4" />}
+                              </button>
+                            </th>
                           )
                         })}
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
+                      </tr>
+                    </thead>
+                    <tbody>
                       {companies.map((company) => {
                         const ed = company.extra_data || {}
                         return (
-                          <TableRow
+                          <tr
                             key={company.id}
-                            className="cursor-pointer"
+                            style={{
+                              cursor: 'pointer',
+                              borderBottom: '1px solid hsl(var(--border))',
+                            }}
                             onClick={() => router.push(`/stocks/${company.id}`)}
+                            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'hsl(var(--muted))'}
+                            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                           >
-                            {/* Core Fields */}
-                            <TableCell
-                              className="font-medium border-r"
-                              style={{
-                                position: 'sticky',
-                                left: 0,
-                                zIndex: 10,
-                                backgroundColor: 'hsl(var(--background))',
-                              }}
-                            >
+                            {/* Name - Sticky */}
+                            <td style={{
+                              position: 'sticky',
+                              left: 0,
+                              zIndex: 10,
+                              backgroundColor: 'hsl(var(--background))',
+                              padding: '12px 16px',
+                              fontWeight: 500,
+                              borderRight: '1px solid hsl(var(--border))',
+                            }}>
                               {company.name}
-                            </TableCell>
-                            <TableCell>
-                              {company.symbol || <span className="text-muted-foreground">-</span>}
-                            </TableCell>
-                            <TableCell>
-                              {company.wkn || <span className="text-muted-foreground">-</span>}
-                            </TableCell>
-                            <TableCell>
-                              {company.isin || <span className="text-muted-foreground">-</span>}
-                            </TableCell>
+                            </td>
+
+                            {/* Other core fields */}
+                            <td style={{ padding: '12px 16px' }}>
+                              {company.symbol || <span style={{ color: 'hsl(var(--muted-foreground))' }}>-</span>}
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              {company.wkn || <span style={{ color: 'hsl(var(--muted-foreground))' }}>-</span>}
+                            </td>
+                            <td style={{ padding: '12px 16px' }}>
+                              {company.isin || <span style={{ color: 'hsl(var(--muted-foreground))' }}>-</span>}
+                            </td>
 
                             {/* Dynamic extra_data fields */}
                             {allExtraDataFields.map(field => {
                               const value = ed[field]
                               const isPrice = field.includes('Price') || field.includes('$')
-                              const align = isPrice || field.includes('Volume') || field.includes('Cap') ? 'text-right' : ''
+                              const align = isPrice || field.includes('Volume') || field.includes('Cap') ? 'right' : 'left'
 
                               // Special rendering for specific fields
                               if (field === 'Price_Change_Percent' && typeof value === 'number') {
                                 return (
-                                  <TableCell key={field} className={align}>
-                                    <span className={value >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                  <td key={field} style={{ padding: '12px 16px', textAlign: align }}>
+                                    <span style={{ color: value >= 0 ? '#16a34a' : '#dc2626' }}>
                                       {value > 0 ? '+' : ''}{formatValue(value)}%
                                     </span>
-                                  </TableCell>
+                                  </td>
                                 )
                               }
 
                               if ((field.includes('color') || field.includes('Color')) && typeof value === 'string' && value.startsWith('#')) {
                                 return (
-                                  <TableCell key={field}>
-                                    <div className="flex items-center space-x-2">
+                                  <td key={field} style={{ padding: '12px 16px' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                       <div
-                                        className="w-4 h-4 rounded border"
-                                        style={{ backgroundColor: value }}
+                                        style={{
+                                          width: '16px',
+                                          height: '16px',
+                                          borderRadius: '2px',
+                                          border: '1px solid hsl(var(--border))',
+                                          backgroundColor: value,
+                                        }}
                                       />
-                                      <span className="text-xs">{value}</span>
+                                      <span style={{ fontSize: '0.75rem' }}>{value}</span>
                                     </div>
-                                  </TableCell>
+                                  </td>
                                 )
                               }
 
                               if (field === 'Profile' && typeof value === 'string') {
                                 return (
-                                  <TableCell key={field}>
-                                    <div className="max-w-[300px] truncate" title={value}>
+                                  <td key={field} style={{ padding: '12px 16px' }}>
+                                    <div style={{
+                                      maxWidth: '300px',
+                                      overflow: 'hidden',
+                                      textOverflow: 'ellipsis',
+                                      whiteSpace: 'nowrap',
+                                    }} title={value}>
                                       {value}
                                     </div>
-                                  </TableCell>
+                                  </td>
                                 )
                               }
 
@@ -374,28 +429,31 @@ export default function StocksPage() {
                                   (typeof value === 'string' || typeof value === 'number')) {
                                 try {
                                   return (
-                                    <TableCell key={field} className={align}>
+                                    <td key={field} style={{ padding: '12px 16px', textAlign: align }}>
                                       {new Date(value).toLocaleString()}
-                                    </TableCell>
+                                    </td>
                                   )
                                 } catch {
-                                  return <TableCell key={field} className={align}>{formatValue(value)}</TableCell>
+                                  return (
+                                    <td key={field} style={{ padding: '12px 16px', textAlign: align }}>
+                                      {formatValue(value)}
+                                    </td>
+                                  )
                                 }
                               }
 
                               return (
-                                <TableCell key={field} className={align}>
+                                <td key={field} style={{ padding: '12px 16px', textAlign: align }}>
                                   {formatValue(value)}
-                                </TableCell>
+                                </td>
                               )
                             })}
-                          </TableRow>
+                          </tr>
                         )
                       })}
-                    </TableBody>
-                  </Table>
+                    </tbody>
+                  </table>
                 </div>
-              </div>
 
                 {/* Pagination - only show when not in "Show All" mode */}
                 {!showAll && (
