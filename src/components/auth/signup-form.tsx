@@ -1,10 +1,9 @@
 'use client'
 
-import { useActionState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
-import { signup } from '@/lib/auth/actions'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,13 +11,52 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 
 export function SignupForm() {
   const router = useRouter()
-  const [state, formAction, isPending] = useActionState(signup, null)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  useEffect(() => {
-    if (state?.success && state.redirectTo) {
-      router.push(state.redirectTo)
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault()
+    setLoading(true)
+    setError(null)
+
+    const formData = new FormData(e.currentTarget)
+    const email = formData.get('email') as string
+    const password = formData.get('password') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (password !== confirmPassword) {
+      setError("Passwords don't match")
+      setLoading(false)
+      return
     }
-  }, [state, router])
+
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters')
+      setLoading(false)
+      return
+    }
+
+    const supabase = createClient()
+
+    const { error: signUpError } = await supabase.auth.signUp({
+      email,
+      password,
+    })
+
+    if (signUpError) {
+      setError(signUpError.message)
+      setLoading(false)
+      return
+    }
+
+    setSuccess(true)
+    setLoading(false)
+
+    // Redirect to dashboard after successful signup
+    router.push('/dashboard')
+    router.refresh()
+  }
 
   return (
     <Card className="w-full max-w-md">
@@ -28,17 +66,17 @@ export function SignupForm() {
           Enter your information to create an account
         </CardDescription>
       </CardHeader>
-      <form action={formAction}>
+      <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          {state && !state.success && (
+          {error && (
             <div className="rounded-md bg-destructive/10 p-3 text-sm text-destructive">
-              {state.error?.message}
+              {error}
             </div>
           )}
 
-          {state?.success && (
+          {success && (
             <div className="rounded-md bg-green-50 p-3 text-sm text-green-800">
-              Account created! Check your email to confirm.
+              Account created successfully!
             </div>
           )}
 
@@ -51,7 +89,7 @@ export function SignupForm() {
               placeholder="you@example.com"
               required
               autoComplete="email"
-              disabled={isPending}
+              disabled={loading}
             />
           </div>
 
@@ -64,7 +102,7 @@ export function SignupForm() {
               placeholder="••••••••"
               required
               autoComplete="new-password"
-              disabled={isPending}
+              disabled={loading}
               minLength={8}
             />
             <p className="text-xs text-muted-foreground">
@@ -81,13 +119,13 @@ export function SignupForm() {
               placeholder="••••••••"
               required
               autoComplete="new-password"
-              disabled={isPending}
+              disabled={loading}
             />
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-4">
-          <Button type="submit" className="w-full" disabled={isPending}>
-            {isPending ? 'Creating account...' : 'Create Account'}
+          <Button type="submit" className="w-full" disabled={loading}>
+            {loading ? 'Creating account...' : 'Create Account'}
           </Button>
           <p className="text-sm text-muted-foreground text-center">
             Already have an account?{' '}
