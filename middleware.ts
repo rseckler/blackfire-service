@@ -62,8 +62,7 @@ export const config = {
      * - favicon.ico (favicon file)
      * - public folder
      * - api routes
-     * TEMPORARILY DISABLED - testing without middleware
      */
-    '/____DISABLED____',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$|api).*)',
   ],
 }

@@ -24,8 +24,6 @@ export function LoginForm() {
       const email = formData.get('email') as string
       const password = formData.get('password') as string
 
-      console.log('Attempting login...', { email })
-
       const supabase = createClient()
 
       const { data, error: signInError } = await supabase.auth.signInWithPassword({
@@ -33,43 +31,24 @@ export function LoginForm() {
         password,
       })
 
-      console.log('Login response:', { data, error: signInError })
-
       if (signInError) {
-        console.error('Login error:', signInError)
         setError(signInError.message)
         setLoading(false)
         return
       }
 
       if (!data.session) {
-        console.error('No session returned')
         setError('Login failed - no session created')
         setLoading(false)
         return
       }
 
-      console.log('Login successful, redirecting...')
-
-      // Verify session is properly set
-      const { data: sessionData } = await supabase.auth.getSession()
-      console.log('Session verification:', sessionData)
-
-      if (!sessionData.session) {
-        console.error('Session not set properly')
-        setError('Login succeeded but session not created. Please try again.')
-        setLoading(false)
-        return
-      }
-
       // Wait a moment for cookies to fully propagate
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise(resolve => setTimeout(resolve, 500))
 
       // Use window.location for full page reload to ensure cookies are sent
-      console.log('Redirecting to dashboard...')
       window.location.href = '/dashboard'
     } catch (err) {
-      console.error('Unexpected error:', err)
       setError('An unexpected error occurred')
       setLoading(false)
     }

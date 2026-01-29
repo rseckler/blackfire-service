@@ -21,15 +21,11 @@ export default function DashboardLayout({
       const supabase = createClient()
       const { data: { session } } = await supabase.auth.getSession()
 
-      console.log('Dashboard layout - checking session:', session)
-
       if (!session) {
-        console.log('No session, redirecting to login')
         router.push('/login')
         return
       }
 
-      console.log('Session found, user:', session.user)
       setUser(session.user)
       setLoading(false)
     }
