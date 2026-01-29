@@ -23,7 +23,7 @@ interface Company {
   isin: string | null
   satellog: string
   current_price: number | null
-  extra_data: Record<string, unknown>
+  extra_data: Record<string, string | number | boolean | null>
   created_at: string
 }
 
@@ -92,13 +92,13 @@ export default function StocksPage() {
     setPage(1)
   }
 
-  const formatValue = (value: unknown): string => {
+  const formatValue = (value: string | number | boolean | null | undefined): string => {
     if (value === null || value === undefined) return '-'
     if (typeof value === 'number') {
       return value.toLocaleString()
     }
     if (typeof value === 'boolean') return value ? '✓' : '✗'
-    return value.toString()
+    return String(value)
   }
 
   return (

@@ -80,30 +80,35 @@ export async function POST() {
       const extraData: Record<string, unknown> = {}
 
       // Helper to extract property value
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const getValue = (prop: NotionProperty): unknown => {
         if (!prop) return null
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const p = prop as any
+
         switch (prop.type) {
           case 'title':
-            return (prop as any).title?.[0]?.plain_text || null
+            return p.title?.[0]?.plain_text || null
           case 'rich_text':
-            return (prop as any).rich_text?.[0]?.plain_text || null
+            return p.rich_text?.[0]?.plain_text || null
           case 'number':
-            return (prop as any).number || null
+            return p.number || null
           case 'select':
-            return (prop as any).select?.name || null
+            return p.select?.name || null
           case 'multi_select':
-            return (prop as any).multi_select?.map((s: any) => s.name) || []
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return p.multi_select?.map((s: any) => s.name) || []
           case 'date':
-            return (prop as any).date?.start || null
+            return p.date?.start || null
           case 'checkbox':
-            return (prop as any).checkbox || false
+            return p.checkbox || false
           case 'url':
-            return (prop as any).url || null
+            return p.url || null
           case 'email':
-            return (prop as any).email || null
+            return p.email || null
           case 'phone_number':
-            return (prop as any).phone_number || null
+            return p.phone_number || null
           default:
             return null
         }
@@ -142,7 +147,6 @@ export async function POST() {
 
     // Insert in batches
     let inserted = 0
-    let updated = 0
 
     for (let i = 0; i < companies.length; i += BATCH_SIZE) {
       const batch = companies.slice(i, i + BATCH_SIZE)

@@ -13,7 +13,7 @@ interface WatchlistButtonProps {
 
 export function WatchlistButton({
   companyId,
-  companyName,
+  companyName: _companyName,
   variant = 'outline',
   size = 'default',
 }: WatchlistButtonProps) {
