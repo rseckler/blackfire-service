@@ -46,11 +46,24 @@ export default function StocksPage() {
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [allExtraDataFields, setAllExtraDataFields] = useState<string[]>([])
+  const [tableScroll, setTableScroll] = useState(0)
 
   const limit = 50
 
   // Core fields that are always shown first
   const coreFields = ['name', 'symbol', 'wkn', 'isin']
+
+  // Sync scroll between table container and scrollbar helper
+  const handleTableScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    setTableScroll(e.currentTarget.scrollLeft)
+  }
+
+  const handleScrollbarScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const tableContainer = document.getElementById('table-container')
+    if (tableContainer) {
+      tableContainer.scrollLeft = e.currentTarget.scrollLeft
+    }
+  }
 
   useEffect(() => {
     fetchCompanies()
@@ -181,11 +194,17 @@ export default function StocksPage() {
             ) : (
               <>
                 {/* Info banner for wide table */}
-                <div className="bg-muted/50 rounded-md p-3 text-sm text-muted-foreground border">
-                  💡 Tip: Scroll horizontally and vertically within the table below to view all {companies.length} companies across {coreFields.length + allExtraDataFields.length} columns
+                <div className="bg-muted/50 rounded-md p-3 text-sm text-muted-foreground border flex items-center justify-between">
+                  <span>💡 Table header stays fixed while scrolling. Use horizontal scrollbar at bottom to view all {coreFields.length + allExtraDataFields.length} columns.</span>
                 </div>
 
-                <div className="rounded-md border overflow-auto max-h-[600px] relative">
+                {/* Table wrapper with fixed height for always-visible scrollbars */}
+                <div
+                  id="table-container"
+                  className="rounded-md border overflow-auto relative"
+                  style={{ height: '500px' }}
+                  onScroll={handleTableScroll}
+                >
                   <Table>
                     <TableHeader className="sticky top-0 bg-background z-20">
                       <TableRow>
