@@ -20,7 +20,10 @@ const signupSchema = z.object({
   path: ["confirmPassword"],
 })
 
-export async function login(formData: FormData): Promise<AuthResponse> {
+export async function login(
+  prevState: AuthResponse | null,
+  formData: FormData
+): Promise<AuthResponse> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
@@ -51,7 +54,10 @@ export async function login(formData: FormData): Promise<AuthResponse> {
   redirect('/dashboard')
 }
 
-export async function signup(formData: FormData): Promise<AuthResponse> {
+export async function signup(
+  prevState: AuthResponse | null,
+  formData: FormData
+): Promise<AuthResponse> {
   const email = formData.get('email') as string
   const password = formData.get('password') as string
   const confirmPassword = formData.get('confirmPassword') as string
