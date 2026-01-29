@@ -19,25 +19,44 @@ export function LoginForm() {
     setLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-    const email = formData.get('email') as string
-    const password = formData.get('password') as string
+    try {
+      const formData = new FormData(e.currentTarget)
+      const email = formData.get('email') as string
+      const password = formData.get('password') as string
 
-    const supabase = createClient()
+      console.log('Attempting login...', { email })
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+      const supabase = createClient()
 
-    if (signInError) {
-      setError(signInError.message)
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      console.log('Login response:', { data, error: signInError })
+
+      if (signInError) {
+        console.error('Login error:', signInError)
+        setError(signInError.message)
+        setLoading(false)
+        return
+      }
+
+      if (!data.session) {
+        console.error('No session returned')
+        setError('Login failed - no session created')
+        setLoading(false)
+        return
+      }
+
+      console.log('Login successful, redirecting...')
+      router.push('/dashboard')
+      router.refresh()
+    } catch (err) {
+      console.error('Unexpected error:', err)
+      setError('An unexpected error occurred')
       setLoading(false)
-      return
     }
-
-    router.push('/dashboard')
-    router.refresh()
   }
 
   return (
