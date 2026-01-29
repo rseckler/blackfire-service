@@ -26,7 +26,7 @@ interface WatchlistItem {
     wkn: string | null
     isin: string | null
     current_price: number | null
-    extra_data: Record<string, any>
+    extra_data: Record<string, unknown>
   }
 }
 
@@ -74,7 +74,7 @@ export default function WatchlistPage() {
     }
   }
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return '-'
     if (typeof value === 'number') return value.toLocaleString()
     return value.toString()

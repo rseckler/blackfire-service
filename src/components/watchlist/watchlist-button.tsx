@@ -6,7 +6,7 @@ import { Star } from 'lucide-react'
 
 interface WatchlistButtonProps {
   companyId: string
-  companyName: string
+  companyName?: string
   variant?: 'default' | 'outline' | 'ghost'
   size?: 'default' | 'sm' | 'lg'
 }
@@ -22,6 +22,7 @@ export function WatchlistButton({
 
   useEffect(() => {
     checkWatchlistStatus()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [companyId])
 
   const checkWatchlistStatus = async () => {
@@ -31,7 +32,7 @@ export function WatchlistButton({
 
       if (response.ok) {
         const inWatchlist = data.watchlist?.some(
-          (item: any) => item.company_id === companyId
+          (item: { company_id: string }) => item.company_id === companyId
         )
         setIsInWatchlist(inWatchlist)
       }

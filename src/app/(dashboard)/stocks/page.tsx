@@ -23,7 +23,7 @@ interface Company {
   isin: string | null
   satellog: string
   current_price: number | null
-  extra_data: Record<string, any>
+  extra_data: Record<string, unknown>
   created_at: string
 }
 
@@ -50,6 +50,7 @@ export default function StocksPage() {
 
   useEffect(() => {
     fetchCompanies()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, sortBy, sortOrder])
 
   const fetchCompanies = async () => {
@@ -91,7 +92,7 @@ export default function StocksPage() {
     setPage(1)
   }
 
-  const formatValue = (value: any): string => {
+  const formatValue = (value: unknown): string => {
     if (value === null || value === undefined) return '-'
     if (typeof value === 'number') {
       return value.toLocaleString()

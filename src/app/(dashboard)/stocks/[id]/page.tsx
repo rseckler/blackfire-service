@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft, ExternalLink } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { WatchlistButton } from '@/components/watchlist/watchlist-button'
 
@@ -17,7 +17,7 @@ interface Company {
   isin: string | null
   satellog: string
   current_price: number | null
-  extra_data: Record<string, any>
+  extra_data: Record<string, unknown>
   created_at: string
 }
 
@@ -32,14 +32,21 @@ export default function CompanyDetailPage() {
 
   useEffect(() => {
     fetchCompany()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id])
 
   const fetchCompany = async () => {
     try {
+      const companyId = params.id as string
+
+      if (!companyId) {
+        throw new Error('Company ID is required')
+      }
+
       const { data, error: fetchError } = await supabase
         .from('companies')
         .select('*')
-        .eq('id', params.id)
+        .eq('id', companyId)
         .single()
 
       if (fetchError) throw fetchError
