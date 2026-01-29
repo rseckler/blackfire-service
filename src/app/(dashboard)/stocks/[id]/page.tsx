@@ -162,7 +162,7 @@ export default function CompanyDetailPage() {
       )}
 
       {/* Profile */}
-      {ed.Profile && (
+      {typeof ed.Profile === 'string' && (
         <Card>
           <CardHeader>
             <CardTitle>Company Profile</CardTitle>

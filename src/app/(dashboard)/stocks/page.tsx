@@ -313,7 +313,7 @@ export default function StocksPage() {
 
                             {/* Profile - truncated with title */}
                             <TableCell>
-                              {ed.Profile ? (
+                              {typeof ed.Profile === 'string' ? (
                                 <div className="max-w-[300px] truncate" title={ed.Profile}>
                                   {ed.Profile}
                                 </div>
