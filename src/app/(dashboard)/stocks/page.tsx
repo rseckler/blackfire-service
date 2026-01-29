@@ -163,12 +163,17 @@ export default function StocksPage() {
               </div>
             ) : (
               <>
-                <div className="rounded-md border overflow-x-auto">
+                {/* Info banner for wide table */}
+                <div className="bg-muted/50 rounded-md p-3 text-sm text-muted-foreground border">
+                  💡 Tip: Scroll horizontally and vertically within the table below to view all {companies.length} companies across 33 columns
+                </div>
+
+                <div className="rounded-md border overflow-auto max-h-[600px] relative">
                   <Table>
-                    <TableHeader>
+                    <TableHeader className="sticky top-0 bg-background z-20">
                       <TableRow>
                         {/* Core Fields */}
-                        <SortableHeader column="name" label="Name" className="sticky left-0 bg-background z-10 min-w-[250px]" />
+                        <SortableHeader column="name" label="Name" className="sticky left-0 bg-background z-30 min-w-[250px]" />
                         <SortableHeader column="symbol" label="Symbol" className="min-w-[100px]" />
                         <SortableHeader column="Ticker" label="Ticker" className="min-w-[100px]" />
                         <SortableHeader column="wkn" label="WKN" className="min-w-[100px]" />
@@ -224,7 +229,7 @@ export default function StocksPage() {
                             onClick={() => router.push(`/stocks/${company.id}`)}
                           >
                             {/* Core Fields */}
-                            <TableCell className="sticky left-0 bg-background z-10 font-medium">
+                            <TableCell className="sticky left-0 bg-background z-30 font-medium border-r">
                               {company.name}
                             </TableCell>
                             <TableCell>
