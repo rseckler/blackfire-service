@@ -246,7 +246,7 @@ export default function StocksPage() {
                             <TableCell className="text-right">{formatValue(ed.Day_High)}</TableCell>
                             <TableCell className="text-right">{formatValue(ed.Day_Low)}</TableCell>
                             <TableCell className="text-right">
-                              {ed.Price_Change_Percent !== null && ed.Price_Change_Percent !== undefined ?
+                              {typeof ed.Price_Change_Percent === 'number' ?
                                 <span className={ed.Price_Change_Percent >= 0 ? 'text-green-600' : 'text-red-600'}>
                                   {ed.Price_Change_Percent > 0 ? '+' : ''}{formatValue(ed.Price_Change_Percent)}%
                                 </span> :

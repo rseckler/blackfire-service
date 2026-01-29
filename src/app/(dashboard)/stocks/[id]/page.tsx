@@ -131,7 +131,7 @@ export default function CompanyDetailPage() {
                   {formatValue(ed.Current_Price)} {ed.Currency}
                 </div>
               </div>
-              {ed.Price_Change_Percent !== null && ed.Price_Change_Percent !== undefined && (
+              {typeof ed.Price_Change_Percent === 'number' && (
                 <div>
                   <div className="text-sm text-muted-foreground">Change</div>
                   <div className={`text-2xl font-semibold ${ed.Price_Change_Percent >= 0 ? 'text-green-600' : 'text-red-600'}`}>
