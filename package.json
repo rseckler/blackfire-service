@@ -25,6 +25,7 @@
     "deploy:vps": "bash scripts/deploy-vps.sh",
     "backup:db": "bash scripts/backup-db.sh",
     "import:notion": "tsx scripts/import-companies-from-notion.ts",
+    "sync:excel": "python3 scripts/sync_excel_to_postgres.py",
     "prepare": "husky install"
   },
   "dependencies": {
