@@ -109,7 +109,46 @@ export async function POST() {
             return p.email || null
           case 'phone_number':
             return p.phone_number || null
+          case 'formula':
+            // Formulas can return different types
+            if (p.formula?.type === 'string') return p.formula.string
+            if (p.formula?.type === 'number') return p.formula.number
+            if (p.formula?.type === 'boolean') return p.formula.boolean
+            if (p.formula?.type === 'date') return p.formula.date?.start
+            return null
+          case 'rollup':
+            // Rollups can also return different types
+            if (p.rollup?.type === 'number') return p.rollup.number
+            if (p.rollup?.type === 'date') return p.rollup.date?.start
+            if (p.rollup?.type === 'array') {
+              // Return array length or first value
+              return p.rollup.array?.length || 0
+            }
+            return null
+          case 'relation':
+            // Store array of related IDs or count
+            return p.relation?.length || 0
+          case 'people':
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return p.people?.map((person: any) => person.name || person.id).join(', ') || null
+          case 'files':
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return p.files?.map((file: any) => file.name || file.file?.url || file.external?.url).filter(Boolean).join(', ') || null
+          case 'created_time':
+            return p.created_time || null
+          case 'created_by':
+            return p.created_by?.name || p.created_by?.id || null
+          case 'last_edited_time':
+            return p.last_edited_time || null
+          case 'last_edited_by':
+            return p.last_edited_by?.name || p.last_edited_by?.id || null
+          case 'status':
+            return p.status?.name || null
+          case 'unique_id':
+            return p.unique_id?.number || p.unique_id?.prefix || null
           default:
+            // Log unsupported types so we can add them
+            console.warn(`Unsupported property type: ${prop.type}`)
             return null
         }
       }
