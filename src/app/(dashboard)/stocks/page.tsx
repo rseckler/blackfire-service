@@ -45,13 +45,30 @@ export default function StocksPage() {
   const [totalPages, setTotalPages] = useState(0)
   const [sortBy, setSortBy] = useState('name')
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
+  const [allExtraDataFields, setAllExtraDataFields] = useState<string[]>([])
 
   const limit = 50
+
+  // Core fields that are always shown first
+  const coreFields = ['name', 'symbol', 'wkn', 'isin']
 
   useEffect(() => {
     fetchCompanies()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, search, sortBy, sortOrder])
+
+  // Extract all unique extra_data fields from loaded companies
+  useEffect(() => {
+    if (companies.length > 0) {
+      const fieldsSet = new Set<string>()
+      companies.forEach(company => {
+        if (company.extra_data) {
+          Object.keys(company.extra_data).forEach(key => fieldsSet.add(key))
+        }
+      })
+      setAllExtraDataFields(Array.from(fieldsSet).sort())
+    }
+  }, [companies])
 
   const fetchCompanies = async () => {
     setLoading(true)
@@ -165,58 +182,36 @@ export default function StocksPage() {
               <>
                 {/* Info banner for wide table */}
                 <div className="bg-muted/50 rounded-md p-3 text-sm text-muted-foreground border">
-                  💡 Tip: Scroll horizontally and vertically within the table below to view all {companies.length} companies across 33 columns
+                  💡 Tip: Scroll horizontally and vertically within the table below to view all {companies.length} companies across {coreFields.length + allExtraDataFields.length} columns
                 </div>
 
                 <div className="rounded-md border overflow-auto max-h-[600px] relative">
                   <Table>
                     <TableHeader className="sticky top-0 bg-background z-20">
                       <TableRow>
-                        {/* Core Fields */}
+                        {/* Core Fields - always shown first */}
                         <SortableHeader column="name" label="Name" className="sticky left-0 bg-background z-30 min-w-[250px]" />
                         <SortableHeader column="symbol" label="Symbol" className="min-w-[100px]" />
-                        <SortableHeader column="Ticker" label="Ticker" className="min-w-[100px]" />
                         <SortableHeader column="wkn" label="WKN" className="min-w-[100px]" />
                         <SortableHeader column="isin" label="ISIN" className="min-w-[120px]" />
 
-                        {/* Market Data */}
-                        <SortableHeader column="Current_Price" label="Current Price" className="text-right min-w-[100px]" />
-                        <SortableHeader column="Day_High" label="Day High" className="text-right min-w-[100px]" />
-                        <SortableHeader column="Day_Low" label="Day Low" className="text-right min-w-[100px]" />
-                        <SortableHeader column="Price_Change_Percent" label="Price Change %" className="text-right min-w-[100px]" />
-                        <SortableHeader column="Currency" label="Currency" className="min-w-[80px]" />
-                        <SortableHeader column="Volume" label="Volume" className="text-right min-w-[120px]" />
-                        <SortableHeader column="Market_Cap" label="Market Cap" className="text-right min-w-[150px]" />
-                        <SortableHeader column="Market_Status" label="Market Status" className="min-w-[120px]" />
-                        <SortableHeader column="Price_Update" label="Price Update" className="min-w-[150px]" />
+                        {/* Dynamic extra_data fields */}
+                        {allExtraDataFields.map(field => {
+                          // Determine appropriate width based on field type
+                          const isPrice = field.includes('Price') || field.includes('$')
+                          const isLongText = field === 'Profile' || field.includes('Info')
+                          const minWidth = isLongText ? 'min-w-[300px]' : isPrice ? 'min-w-[120px]' : 'min-w-[150px]'
+                          const align = isPrice || field.includes('Volume') || field.includes('Cap') ? 'text-right' : ''
 
-                        {/* Categories */}
-                        <SortableHeader column="Industry" label="Industry" className="min-w-[150px]" />
-                        <SortableHeader column="Exchange" label="Exchange" className="min-w-[100px]" />
-                        <SortableHeader column="Thier" label="Thier" className="min-w-[100px]" />
-                        <SortableHeader column="Thier_Group" label="Thier Group" className="min-w-[100px]" />
-                        <SortableHeader column="VIP" label="VIP" className="min-w-[100px]" />
-                        <SortableHeader column="Prio_Buy" label="Prio Buy" className="min-w-[100px]" />
-                        <SortableHeader column="Leverage" label="Leverage" className="min-w-[100px]" />
-
-                        {/* Info Fields */}
-                        <SortableHeader column="Info1" label="Info1" className="min-w-[150px]" />
-                        <SortableHeader column="Info2" label="Info2" className="min-w-[150px]" />
-                        <SortableHeader column="Info3" label="Info3" className="min-w-[150px]" />
-                        <SortableHeader column="Info5" label="Info5" className="min-w-[150px]" />
-
-                        {/* Source & Meta */}
-                        <SortableHeader column="Source" label="Source" className="min-w-[100px]" />
-                        <SortableHeader column="Purchase_$" label="Purchase $" className="text-right min-w-[100px]" />
-                        <SortableHeader column="Ranking alt" label="Ranking" className="text-right min-w-[100px]" />
-                        <SortableHeader column="Date " label="Date" className="min-w-[100px]" />
-
-                        {/* UI Colors */}
-                        <SortableHeader column="Background_color" label="Background" className="min-w-[120px]" />
-                        <SortableHeader column="Font_color" label="Font Color" className="min-w-[120px]" />
-
-                        {/* Profile - last because it's long */}
-                        <SortableHeader column="Profile" label="Profile" className="min-w-[300px]" />
+                          return (
+                            <SortableHeader
+                              key={field}
+                              column={field}
+                              label={field.replace(/_/g, ' ')}
+                              className={`${minWidth} ${align}`}
+                            />
+                          )
+                        })}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -236,98 +231,72 @@ export default function StocksPage() {
                               {company.symbol || <span className="text-muted-foreground">-</span>}
                             </TableCell>
                             <TableCell>
-                              {formatValue(ed.Ticker)}
-                            </TableCell>
-                            <TableCell>
                               {company.wkn || <span className="text-muted-foreground">-</span>}
                             </TableCell>
                             <TableCell>
                               {company.isin || <span className="text-muted-foreground">-</span>}
                             </TableCell>
 
-                            {/* Market Data */}
-                            <TableCell className="text-right">
-                              {ed.Current_Price ?
-                                `${formatValue(ed.Current_Price)} ${ed.Currency || ''}`.trim() :
-                                <span className="text-muted-foreground">-</span>
+                            {/* Dynamic extra_data fields */}
+                            {allExtraDataFields.map(field => {
+                              const value = ed[field]
+                              const isPrice = field.includes('Price') || field.includes('$')
+                              const align = isPrice || field.includes('Volume') || field.includes('Cap') ? 'text-right' : ''
+
+                              // Special rendering for specific fields
+                              if (field === 'Price_Change_Percent' && typeof value === 'number') {
+                                return (
+                                  <TableCell key={field} className={align}>
+                                    <span className={value >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                      {value > 0 ? '+' : ''}{formatValue(value)}%
+                                    </span>
+                                  </TableCell>
+                                )
                               }
-                            </TableCell>
-                            <TableCell className="text-right">{formatValue(ed.Day_High)}</TableCell>
-                            <TableCell className="text-right">{formatValue(ed.Day_Low)}</TableCell>
-                            <TableCell className="text-right">
-                              {typeof ed.Price_Change_Percent === 'number' ?
-                                <span className={ed.Price_Change_Percent >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                  {ed.Price_Change_Percent > 0 ? '+' : ''}{formatValue(ed.Price_Change_Percent)}%
-                                </span> :
-                                <span className="text-muted-foreground">-</span>
+
+                              if ((field.includes('color') || field.includes('Color')) && typeof value === 'string' && value.startsWith('#')) {
+                                return (
+                                  <TableCell key={field}>
+                                    <div className="flex items-center space-x-2">
+                                      <div
+                                        className="w-4 h-4 rounded border"
+                                        style={{ backgroundColor: value }}
+                                      />
+                                      <span className="text-xs">{value}</span>
+                                    </div>
+                                  </TableCell>
+                                )
                               }
-                            </TableCell>
-                            <TableCell>{formatValue(ed.Currency)}</TableCell>
-                            <TableCell className="text-right">{formatValue(ed.Volume)}</TableCell>
-                            <TableCell className="text-right">{formatValue(ed.Market_Cap)}</TableCell>
-                            <TableCell>{formatValue(ed.Market_Status)}</TableCell>
-                            <TableCell>
-                              {(typeof ed.Price_Update === 'string' || typeof ed.Price_Update === 'number') ?
-                                new Date(ed.Price_Update).toLocaleString() :
-                                <span className="text-muted-foreground">-</span>
+
+                              if (field === 'Profile' && typeof value === 'string') {
+                                return (
+                                  <TableCell key={field}>
+                                    <div className="max-w-[300px] truncate" title={value}>
+                                      {value}
+                                    </div>
+                                  </TableCell>
+                                )
                               }
-                            </TableCell>
 
-                            {/* Categories */}
-                            <TableCell>{formatValue(ed.Industry)}</TableCell>
-                            <TableCell>{formatValue(ed.Exchange)}</TableCell>
-                            <TableCell>{formatValue(ed.Thier)}</TableCell>
-                            <TableCell>{formatValue(ed.Thier_Group)}</TableCell>
-                            <TableCell>{formatValue(ed.VIP)}</TableCell>
-                            <TableCell>{formatValue(ed.Prio_Buy)}</TableCell>
-                            <TableCell>{formatValue(ed.Leverage)}</TableCell>
+                              if ((field.includes('time') || field.includes('Time') || field.includes('Update') || field.includes('Date')) &&
+                                  (typeof value === 'string' || typeof value === 'number')) {
+                                try {
+                                  return (
+                                    <TableCell key={field} className={align}>
+                                      {new Date(value).toLocaleString()}
+                                    </TableCell>
+                                  )
+                                } catch {
+                                  return <TableCell key={field} className={align}>{formatValue(value)}</TableCell>
+                                }
+                              }
 
-                            {/* Info Fields */}
-                            <TableCell>{formatValue(ed.Info1)}</TableCell>
-                            <TableCell>{formatValue(ed.Info2)}</TableCell>
-                            <TableCell>{formatValue(ed.Info3)}</TableCell>
-                            <TableCell>{formatValue(ed.Info5)}</TableCell>
-
-                            {/* Source & Meta */}
-                            <TableCell>{formatValue(ed.Source)}</TableCell>
-                            <TableCell className="text-right">{formatValue(ed['Purchase_$'])}</TableCell>
-                            <TableCell className="text-right">{formatValue(ed['Ranking alt'])}</TableCell>
-                            <TableCell>
-                              {ed['Date '] ? formatValue(ed['Date ']) : <span className="text-muted-foreground">-</span>}
-                            </TableCell>
-
-                            {/* UI Colors */}
-                            <TableCell>
-                              {typeof ed.Background_color === 'string' ? (
-                                <div className="flex items-center space-x-2">
-                                  <div
-                                    className="w-4 h-4 rounded border"
-                                    style={{ backgroundColor: ed.Background_color }}
-                                  />
-                                  <span className="text-xs">{ed.Background_color}</span>
-                                </div>
-                              ) : <span className="text-muted-foreground">-</span>}
-                            </TableCell>
-                            <TableCell>
-                              {typeof ed.Font_color === 'string' ? (
-                                <div className="flex items-center space-x-2">
-                                  <div
-                                    className="w-4 h-4 rounded border"
-                                    style={{ backgroundColor: ed.Font_color }}
-                                  />
-                                  <span className="text-xs">{ed.Font_color}</span>
-                                </div>
-                              ) : <span className="text-muted-foreground">-</span>}
-                            </TableCell>
-
-                            {/* Profile - truncated with title */}
-                            <TableCell>
-                              {typeof ed.Profile === 'string' ? (
-                                <div className="max-w-[300px] truncate" title={ed.Profile}>
-                                  {ed.Profile}
-                                </div>
-                              ) : <span className="text-muted-foreground">-</span>}
-                            </TableCell>
+                              return (
+                                <TableCell key={field} className={align}>
+                                  {formatValue(value)}
+                                </TableCell>
+                              )
+                            })}
                           </TableRow>
                         )
                       })}
