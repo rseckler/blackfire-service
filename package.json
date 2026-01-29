@@ -24,6 +24,7 @@
     "docker:prod": "docker-compose -f docker-compose.prod.yml up -d",
     "deploy:vps": "bash scripts/deploy-vps.sh",
     "backup:db": "bash scripts/backup-db.sh",
+    "import:notion": "tsx scripts/import-companies-from-notion.ts",
     "prepare": "husky install"
   },
   "dependencies": {
@@ -60,7 +61,9 @@
     "class-variance-authority": "^0.7.1",
     "bullmq": "^5.26.1",
     "ioredis": "^5.4.2",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "@notionhq/client": "^2.2.15",
+    "tsx": "^4.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",
