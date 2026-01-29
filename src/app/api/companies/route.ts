@@ -18,10 +18,10 @@ export async function GET(request: NextRequest) {
 
     const offset = (page - 1) * limit
 
-    // Build query
+    // Build query - include extra_data
     let query = supabase
       .from('companies')
-      .select('id, name, symbol, wkn, isin, satellog, current_price, created_at', { count: 'exact' })
+      .select('id, name, symbol, wkn, isin, satellog, current_price, extra_data, created_at', { count: 'exact' })
 
     // Search filter
     if (search) {
