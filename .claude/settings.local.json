@@ -6,7 +6,20 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:support.simplywall.st)",
       "Bash(tree:*)",
-      "Bash(chmod:*)"
+      "Bash(chmod:*)",
+      "Bash(curl:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git fetch:*)",
+      "Bash(npm install:*)",
+      "Bash(git config:*)",
+      "Bash(npx shadcn@latest add button input label card form separator avatar dropdown-menu --yes)",
+      "Bash(node:*)",
+      "Bash(npm --version:*)",
+      "Bash(echo:*)",
+      "Bash(/opt/homebrew/bin/node:*)",
+      "Bash(/usr/local/bin/node:*)"
     ]
   }
 }

@@ -1,4 +1,10 @@
-export default function HomePage() {
+import Link from 'next/link'
+import { getUser } from '@/lib/auth/session'
+import { Button } from '@/components/ui/button'
+
+export default async function HomePage() {
+  const user = await getUser()
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <div className="z-10 w-full max-w-5xl items-center justify-between text-center">
@@ -9,18 +15,20 @@ export default function HomePage() {
           Stock Investment Analysis Platform
         </p>
         <div className="flex gap-4 justify-center">
-          <a
-            href="/dashboard"
-            className="rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground hover:opacity-90 transition-opacity"
-          >
-            Get Started
-          </a>
-          <a
-            href="/about"
-            className="rounded-lg border border-border px-6 py-3 font-semibold hover:bg-accent transition-colors"
-          >
-            Learn More
-          </a>
+          {user ? (
+            <Button asChild size="lg">
+              <Link href="/dashboard">Go to Dashboard</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild size="lg">
+                <Link href="/login">Get Started</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/signup">Sign Up</Link>
+              </Button>
+            </>
+          )}
         </div>
       </div>
     </main>
