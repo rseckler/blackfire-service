@@ -348,7 +348,7 @@ export default function CompanyDetailPage() {
             <CardTitle>UI Colors</CardTitle>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
-            {ed.Background_color && (
+            {typeof ed.Background_color === 'string' && (
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Background Color</div>
                 <div className="flex items-center space-x-3">
@@ -360,7 +360,7 @@ export default function CompanyDetailPage() {
                 </div>
               </div>
             )}
-            {ed.Font_color && (
+            {typeof ed.Font_color === 'string' && (
               <div>
                 <div className="text-sm text-muted-foreground mb-2">Font Color</div>
                 <div className="flex items-center space-x-3">

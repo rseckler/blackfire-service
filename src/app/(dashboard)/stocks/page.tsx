@@ -289,7 +289,7 @@ export default function StocksPage() {
 
                             {/* UI Colors */}
                             <TableCell>
-                              {ed.Background_color ? (
+                              {typeof ed.Background_color === 'string' ? (
                                 <div className="flex items-center space-x-2">
                                   <div
                                     className="w-4 h-4 rounded border"
@@ -300,7 +300,7 @@ export default function StocksPage() {
                               ) : <span className="text-muted-foreground">-</span>}
                             </TableCell>
                             <TableCell>
-                              {ed.Font_color ? (
+                              {typeof ed.Font_color === 'string' ? (
                                 <div className="flex items-center space-x-2">
                                   <div
                                     className="w-4 h-4 rounded border"
