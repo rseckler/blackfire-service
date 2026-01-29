@@ -28,8 +28,16 @@ export async function GET(request: NextRequest) {
       query = query.or(`name.ilike.%${search}%,symbol.ilike.%${search}%,wkn.ilike.%${search}%,isin.ilike.%${search}%`)
     }
 
-    // Sorting
-    query = query.order(sortBy, { ascending: sortOrder === 'asc' })
+    // Sorting - handle both direct columns and extra_data fields
+    const directColumns = ['name', 'symbol', 'wkn', 'isin', 'current_price', 'created_at', 'satellog']
+
+    if (directColumns.includes(sortBy)) {
+      // Sort by direct column
+      query = query.order(sortBy, { ascending: sortOrder === 'asc' })
+    } else {
+      // Sort by extra_data field using JSONB arrow operator
+      query = query.order(`extra_data->${sortBy}` as any, { ascending: sortOrder === 'asc' })
+    }
 
     // Pagination
     query = query.range(offset, offset + limit - 1)

@@ -101,6 +101,20 @@ export default function StocksPage() {
     return String(value)
   }
 
+  const SortableHeader = ({ column, label, className = '' }: { column: string, label: string, className?: string }) => (
+    <TableHead className={className}>
+      <button
+        className="flex items-center space-x-1 hover:text-foreground"
+        onClick={() => handleSort(column)}
+      >
+        <span>{label}</span>
+        {sortBy === column && (
+          <ArrowUpDown className="h-4 w-4" />
+        )}
+      </button>
+    </TableHead>
+  )
+
   return (
     <div className="space-y-6 p-8">
       <div>
@@ -154,60 +168,50 @@ export default function StocksPage() {
                     <TableHeader>
                       <TableRow>
                         {/* Core Fields */}
-                        <TableHead className="sticky left-0 bg-background z-10 min-w-[250px]">
-                          <button
-                            className="flex items-center space-x-1 hover:text-foreground"
-                            onClick={() => handleSort('name')}
-                          >
-                            <span>Name</span>
-                            {sortBy === 'name' && (
-                              <ArrowUpDown className="h-4 w-4" />
-                            )}
-                          </button>
-                        </TableHead>
-                        <TableHead className="min-w-[100px]">Symbol</TableHead>
-                        <TableHead className="min-w-[100px]">Ticker</TableHead>
-                        <TableHead className="min-w-[100px]">WKN</TableHead>
-                        <TableHead className="min-w-[120px]">ISIN</TableHead>
+                        <SortableHeader column="name" label="Name" className="sticky left-0 bg-background z-10 min-w-[250px]" />
+                        <SortableHeader column="symbol" label="Symbol" className="min-w-[100px]" />
+                        <SortableHeader column="Ticker" label="Ticker" className="min-w-[100px]" />
+                        <SortableHeader column="wkn" label="WKN" className="min-w-[100px]" />
+                        <SortableHeader column="isin" label="ISIN" className="min-w-[120px]" />
 
                         {/* Market Data */}
-                        <TableHead className="text-right min-w-[100px]">Current Price</TableHead>
-                        <TableHead className="text-right min-w-[100px]">Day High</TableHead>
-                        <TableHead className="text-right min-w-[100px]">Day Low</TableHead>
-                        <TableHead className="text-right min-w-[100px]">Price Change %</TableHead>
-                        <TableHead className="min-w-[80px]">Currency</TableHead>
-                        <TableHead className="text-right min-w-[120px]">Volume</TableHead>
-                        <TableHead className="text-right min-w-[150px]">Market Cap</TableHead>
-                        <TableHead className="min-w-[120px]">Market Status</TableHead>
-                        <TableHead className="min-w-[150px]">Price Update</TableHead>
+                        <SortableHeader column="Current_Price" label="Current Price" className="text-right min-w-[100px]" />
+                        <SortableHeader column="Day_High" label="Day High" className="text-right min-w-[100px]" />
+                        <SortableHeader column="Day_Low" label="Day Low" className="text-right min-w-[100px]" />
+                        <SortableHeader column="Price_Change_Percent" label="Price Change %" className="text-right min-w-[100px]" />
+                        <SortableHeader column="Currency" label="Currency" className="min-w-[80px]" />
+                        <SortableHeader column="Volume" label="Volume" className="text-right min-w-[120px]" />
+                        <SortableHeader column="Market_Cap" label="Market Cap" className="text-right min-w-[150px]" />
+                        <SortableHeader column="Market_Status" label="Market Status" className="min-w-[120px]" />
+                        <SortableHeader column="Price_Update" label="Price Update" className="min-w-[150px]" />
 
                         {/* Categories */}
-                        <TableHead className="min-w-[150px]">Industry</TableHead>
-                        <TableHead className="min-w-[100px]">Exchange</TableHead>
-                        <TableHead className="min-w-[100px]">Thier</TableHead>
-                        <TableHead className="min-w-[100px]">Thier Group</TableHead>
-                        <TableHead className="min-w-[100px]">VIP</TableHead>
-                        <TableHead className="min-w-[100px]">Prio Buy</TableHead>
-                        <TableHead className="min-w-[100px]">Leverage</TableHead>
+                        <SortableHeader column="Industry" label="Industry" className="min-w-[150px]" />
+                        <SortableHeader column="Exchange" label="Exchange" className="min-w-[100px]" />
+                        <SortableHeader column="Thier" label="Thier" className="min-w-[100px]" />
+                        <SortableHeader column="Thier_Group" label="Thier Group" className="min-w-[100px]" />
+                        <SortableHeader column="VIP" label="VIP" className="min-w-[100px]" />
+                        <SortableHeader column="Prio_Buy" label="Prio Buy" className="min-w-[100px]" />
+                        <SortableHeader column="Leverage" label="Leverage" className="min-w-[100px]" />
 
                         {/* Info Fields */}
-                        <TableHead className="min-w-[150px]">Info1</TableHead>
-                        <TableHead className="min-w-[150px]">Info2</TableHead>
-                        <TableHead className="min-w-[150px]">Info3</TableHead>
-                        <TableHead className="min-w-[150px]">Info5</TableHead>
+                        <SortableHeader column="Info1" label="Info1" className="min-w-[150px]" />
+                        <SortableHeader column="Info2" label="Info2" className="min-w-[150px]" />
+                        <SortableHeader column="Info3" label="Info3" className="min-w-[150px]" />
+                        <SortableHeader column="Info5" label="Info5" className="min-w-[150px]" />
 
                         {/* Source & Meta */}
-                        <TableHead className="min-w-[100px]">Source</TableHead>
-                        <TableHead className="text-right min-w-[100px]">Purchase $</TableHead>
-                        <TableHead className="text-right min-w-[100px]">Ranking</TableHead>
-                        <TableHead className="min-w-[100px]">Date</TableHead>
+                        <SortableHeader column="Source" label="Source" className="min-w-[100px]" />
+                        <SortableHeader column="Purchase_$" label="Purchase $" className="text-right min-w-[100px]" />
+                        <SortableHeader column="Ranking alt" label="Ranking" className="text-right min-w-[100px]" />
+                        <SortableHeader column="Date " label="Date" className="min-w-[100px]" />
 
                         {/* UI Colors */}
-                        <TableHead className="min-w-[120px]">Background</TableHead>
-                        <TableHead className="min-w-[120px]">Font Color</TableHead>
+                        <SortableHeader column="Background_color" label="Background" className="min-w-[120px]" />
+                        <SortableHeader column="Font_color" label="Font Color" className="min-w-[120px]" />
 
                         {/* Profile - last because it's long */}
-                        <TableHead className="min-w-[300px]">Profile</TableHead>
+                        <SortableHeader column="Profile" label="Profile" className="min-w-[300px]" />
                       </TableRow>
                     </TableHeader>
                     <TableBody>
