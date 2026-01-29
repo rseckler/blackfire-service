@@ -19,7 +19,10 @@
       "Bash(npm --version:*)",
       "Bash(echo:*)",
       "Bash(/opt/homebrew/bin/node:*)",
-      "Bash(/usr/local/bin/node:*)"
+      "Bash(/usr/local/bin/node:*)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@72.62.148.205 \"echo ''SSH connection successful'' && pwd\")",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@72.62.148.205 \"ls -la /opt/ 2>/dev/null || ls -la /var/www/ 2>/dev/null || ls -la /home/ 2>/dev/null || find / -name ''blackfire*'' -type d 2>/dev/null | head -5\")",
+      "Bash(find:*)"
     ]
   }
 }

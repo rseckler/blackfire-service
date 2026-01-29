@@ -1,9 +1,8 @@
-import { cookies } from 'next/headers'
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import type { AuthUser } from './types'
 
 export async function getSession() {
-  const supabase = await createServerClient()
+  const supabase = await createClient()
 
   const { data: { session }, error } = await supabase.auth.getSession()
 

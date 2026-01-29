@@ -2,7 +2,7 @@
 
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
-import { createServerClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import type { AuthResponse } from './types'
 
 // Validation schemas
@@ -34,7 +34,7 @@ export async function login(formData: FormData): Promise<AuthResponse> {
     }
   }
 
-  const supabase = await createServerClient()
+  const supabase = await createClient()
 
   const { error } = await supabase.auth.signInWithPassword({
     email: result.data.email,
@@ -66,7 +66,7 @@ export async function signup(formData: FormData): Promise<AuthResponse> {
     }
   }
 
-  const supabase = await createServerClient()
+  const supabase = await createClient()
 
   const { error } = await supabase.auth.signUp({
     email: result.data.email,
@@ -90,7 +90,7 @@ export async function signup(formData: FormData): Promise<AuthResponse> {
 }
 
 export async function logout(): Promise<void> {
-  const supabase = await createServerClient()
+  const supabase = await createClient()
   await supabase.auth.signOut()
   redirect('/login')
 }
