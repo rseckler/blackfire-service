@@ -51,10 +51,22 @@ export function LoginForm() {
 
       console.log('Login successful, redirecting...')
 
-      // Wait a bit for cookies to be set
-      await new Promise(resolve => setTimeout(resolve, 500))
+      // Verify session is properly set
+      const { data: sessionData } = await supabase.auth.getSession()
+      console.log('Session verification:', sessionData)
+
+      if (!sessionData.session) {
+        console.error('Session not set properly')
+        setError('Login succeeded but session not created. Please try again.')
+        setLoading(false)
+        return
+      }
+
+      // Wait a moment for cookies to fully propagate
+      await new Promise(resolve => setTimeout(resolve, 1000))
 
       // Use window.location for full page reload to ensure cookies are sent
+      console.log('Redirecting to dashboard...')
       window.location.href = '/dashboard'
     } catch (err) {
       console.error('Unexpected error:', err)
