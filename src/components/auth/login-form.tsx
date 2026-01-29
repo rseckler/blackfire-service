@@ -50,8 +50,12 @@ export function LoginForm() {
       }
 
       console.log('Login successful, redirecting...')
-      router.push('/dashboard')
-      router.refresh()
+
+      // Wait a bit for cookies to be set
+      await new Promise(resolve => setTimeout(resolve, 500))
+
+      // Use window.location for full page reload to ensure cookies are sent
+      window.location.href = '/dashboard'
     } catch (err) {
       console.error('Unexpected error:', err)
       setError('An unexpected error occurred')
