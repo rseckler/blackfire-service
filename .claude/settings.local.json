@@ -23,7 +23,12 @@
       "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@72.62.148.205 \"echo ''SSH connection successful'' && pwd\")",
       "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@72.62.148.205 \"ls -la /opt/ 2>/dev/null || ls -la /var/www/ 2>/dev/null || ls -la /home/ 2>/dev/null || find / -name ''blackfire*'' -type d 2>/dev/null | head -5\")",
       "Bash(find:*)",
-      "WebFetch(domain:blackfire-service.vercel.app)"
+      "WebFetch(domain:blackfire-service.vercel.app)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@72.62.148.205 \"cat /root/Blackfire_automation/.env | grep NOTION_API_KEY\")",
+      "Bash(export PATH=\"/usr/local/bin:/opt/homebrew/bin:$PATH\")",
+      "Bash(mdfind:*)",
+      "Bash(export PATH=\"/Users/robin/Library/Application Support/com.raycast.macos/NodeJS/runtime/22.14.0/bin:$PATH\")",
+      "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")"
     ]
   }
 }

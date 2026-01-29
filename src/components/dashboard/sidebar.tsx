@@ -9,6 +9,7 @@ import {
   Star,
   TrendingUp,
   FileText,
+  Settings,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
 
@@ -73,6 +74,21 @@ export function Sidebar() {
             </Link>
           )
         })}
+
+        <Separator className="my-4 bg-slate-800" />
+
+        <Link
+          href="/admin"
+          className={cn(
+            'flex items-center space-x-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+            pathname === '/admin'
+              ? 'bg-slate-800 text-white'
+              : 'text-slate-300 hover:bg-slate-800 hover:text-white'
+          )}
+        >
+          <Settings className="h-5 w-5" />
+          <span>Admin</span>
+        </Link>
       </nav>
 
       <div className="p-4">
