@@ -177,7 +177,6 @@ export async function POST() {
       success: true,
       total: companies.length,
       inserted,
-      updated,
     })
   } catch (error) {
     console.error('❌ Import failed:', error)
