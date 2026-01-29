@@ -51,7 +51,10 @@ export async function login(
     }
   }
 
-  redirect('/dashboard')
+  return {
+    success: true,
+    redirectTo: '/dashboard',
+  }
 }
 
 export async function signup(
