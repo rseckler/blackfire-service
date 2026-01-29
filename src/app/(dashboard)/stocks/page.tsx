@@ -135,12 +135,16 @@ export default function StocksPage() {
   const SortableHeader = ({ column, label, className = '' }: { column: string, label: string, className?: string }) => (
     <TableHead className={className}>
       <button
-        className="flex items-center space-x-1 hover:text-foreground"
-        onClick={() => handleSort(column)}
+        className="flex items-center space-x-1 hover:text-foreground w-full text-left"
+        onClick={(e) => {
+          e.stopPropagation()
+          handleSort(column)
+        }}
+        type="button"
       >
         <span>{label}</span>
         {sortBy === column && (
-          <ArrowUpDown className="h-4 w-4" />
+          <ArrowUpDown className="h-4 w-4 ml-1" />
         )}
       </button>
     </TableHead>
@@ -223,21 +227,51 @@ export default function StocksPage() {
               <>
                 {/* Info banner for wide table */}
                 <div className="bg-muted/50 rounded-md p-3 text-sm text-muted-foreground border flex items-center justify-between">
-                  <span>💡 Table header stays fixed while scrolling. Use horizontal scrollbar at bottom to view all {coreFields.length + allExtraDataFields.length} columns.</span>
+                  <span>💡 Table header and Name column stay fixed while scrolling. Viewing {coreFields.length + allExtraDataFields.length} columns total.</span>
                 </div>
 
-                {/* Table wrapper with fixed height for always-visible scrollbars */}
-                <div
-                  id="table-container"
-                  className="rounded-md border overflow-auto relative"
-                  style={{ height: '500px' }}
-                  onScroll={handleTableScroll}
-                >
-                  <Table>
-                    <TableHeader className="sticky top-0 bg-background z-20">
-                      <TableRow>
+                {/* Table wrapper with fixed positioning */}
+                <div className="relative">
+                  {/* Table container with fixed height and scrollbars */}
+                  <div
+                    id="table-container"
+                    className="rounded-md border overflow-scroll relative"
+                    style={{ height: '500px', width: '100%' }}
+                    onScroll={handleTableScroll}
+                  >
+                    <Table className="relative">
+                      <TableHeader>
+                        <TableRow className="bg-background"
+                          style={{
+                            position: 'sticky',
+                            top: 0,
+                            zIndex: 20,
+                          }}
+                        >
                         {/* Core Fields - always shown first */}
-                        <SortableHeader column="name" label="Name" className="sticky left-0 bg-background z-30 min-w-[250px]" />
+                        <TableHead
+                          className="min-w-[250px] border-r"
+                          style={{
+                            position: 'sticky',
+                            left: 0,
+                            zIndex: 30,
+                            backgroundColor: 'hsl(var(--background))',
+                          }}
+                        >
+                          <button
+                            className="flex items-center space-x-1 hover:text-foreground w-full text-left"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleSort('name')
+                            }}
+                            type="button"
+                          >
+                            <span>Name</span>
+                            {sortBy === 'name' && (
+                              <ArrowUpDown className="h-4 w-4 ml-1" />
+                            )}
+                          </button>
+                        </TableHead>
                         <SortableHeader column="symbol" label="Symbol" className="min-w-[100px]" />
                         <SortableHeader column="wkn" label="WKN" className="min-w-[100px]" />
                         <SortableHeader column="isin" label="ISIN" className="min-w-[120px]" />
@@ -271,7 +305,15 @@ export default function StocksPage() {
                             onClick={() => router.push(`/stocks/${company.id}`)}
                           >
                             {/* Core Fields */}
-                            <TableCell className="sticky left-0 bg-background z-30 font-medium border-r">
+                            <TableCell
+                              className="font-medium border-r"
+                              style={{
+                                position: 'sticky',
+                                left: 0,
+                                zIndex: 10,
+                                backgroundColor: 'hsl(var(--background))',
+                              }}
+                            >
                               {company.name}
                             </TableCell>
                             <TableCell>
@@ -350,6 +392,7 @@ export default function StocksPage() {
                     </TableBody>
                   </Table>
                 </div>
+              </div>
 
                 {/* Pagination - only show when not in "Show All" mode */}
                 {!showAll && (
