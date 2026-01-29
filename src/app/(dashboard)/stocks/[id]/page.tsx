@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { ArrowLeft, ExternalLink } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { WatchlistButton } from '@/components/watchlist/watchlist-button'
 
 interface Company {
   id: string
@@ -98,12 +99,15 @@ export default function CompanyDetailPage() {
           </div>
         </div>
 
-        {ed.Market_Status && (
-          <div className="text-right">
-            <div className="text-sm text-muted-foreground">Market Status</div>
-            <div className="text-lg font-semibold">{ed.Market_Status}</div>
-          </div>
-        )}
+        <div className="flex flex-col items-end space-y-3">
+          <WatchlistButton companyId={company.id} companyName={company.name} />
+          {ed.Market_Status && (
+            <div className="text-right">
+              <div className="text-sm text-muted-foreground">Market Status</div>
+              <div className="text-lg font-semibold">{ed.Market_Status}</div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Price Card */}
