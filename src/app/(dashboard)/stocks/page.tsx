@@ -47,8 +47,9 @@ export default function StocksPage() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
   const [allExtraDataFields, setAllExtraDataFields] = useState<string[]>([])
   const [tableScroll, setTableScroll] = useState(0)
+  const [showAll, setShowAll] = useState(false)
 
-  const limit = 50
+  const limit = showAll ? 10000 : 50
 
   // Core fields that are always shown first
   const coreFields = ['name', 'symbol', 'wkn', 'isin']
@@ -68,7 +69,7 @@ export default function StocksPage() {
   useEffect(() => {
     fetchCompanies()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, search, sortBy, sortOrder])
+  }, [page, search, sortBy, sortOrder, showAll])
 
   // Extract all unique extra_data fields from loaded companies
   useEffect(() => {
@@ -160,26 +161,53 @@ export default function StocksPage() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {/* Search */}
-            <div className="flex items-center space-x-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Search by name, symbol, WKN, or ISIN..."
-                  value={search}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-9"
-                />
+            {/* Search and Options */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by name, symbol, WKN, or ISIN..."
+                    value={search}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearch('')
+                    setPage(1)
+                  }}
+                >
+                  Clear
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setSearch('')
-                  setPage(1)
-                }}
-              >
-                Clear
-              </Button>
+
+              {/* View options */}
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-muted-foreground">View:</span>
+                <Button
+                  variant={showAll ? 'outline' : 'default'}
+                  size="sm"
+                  onClick={() => {
+                    setShowAll(false)
+                    setPage(1)
+                  }}
+                >
+                  Paginated ({limit} per page)
+                </Button>
+                <Button
+                  variant={showAll ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => {
+                    setShowAll(true)
+                    setPage(1)
+                  }}
+                >
+                  Show All ({total.toLocaleString()})
+                </Button>
+              </div>
             </div>
 
             {/* Table */}
@@ -323,37 +351,46 @@ export default function StocksPage() {
                   </Table>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-muted-foreground">
-                    Showing {(page - 1) * limit + 1} to{' '}
-                    {Math.min(page * limit, total)} of {total.toLocaleString()}{' '}
-                    companies
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page - 1)}
-                      disabled={page === 1}
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                      Previous
-                    </Button>
-                    <div className="text-sm">
-                      Page {page} of {totalPages}
+                {/* Pagination - only show when not in "Show All" mode */}
+                {!showAll && (
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-muted-foreground">
+                      Showing {(page - 1) * limit + 1} to{' '}
+                      {Math.min(page * limit, total)} of {total.toLocaleString()}{' '}
+                      companies
                     </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setPage(page + 1)}
-                      disabled={page === totalPages}
-                    >
-                      Next
-                      <ChevronRight className="h-4 w-4" />
-                    </Button>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page - 1)}
+                        disabled={page === 1}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                        Previous
+                      </Button>
+                      <div className="text-sm">
+                        Page {page} of {totalPages}
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setPage(page + 1)}
+                        disabled={page === totalPages}
+                      >
+                        Next
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
-                </div>
+                )}
+
+                {/* Show All mode indicator */}
+                {showAll && (
+                  <div className="text-sm text-muted-foreground text-center py-2">
+                    Showing all {companies.length.toLocaleString()} of {total.toLocaleString()} companies
+                  </div>
+                )}
               </>
             )}
           </div>
