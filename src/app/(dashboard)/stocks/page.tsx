@@ -258,7 +258,7 @@ export default function StocksPage() {
                             <TableCell className="text-right">{formatValue(ed.Market_Cap)}</TableCell>
                             <TableCell>{formatValue(ed.Market_Status)}</TableCell>
                             <TableCell>
-                              {ed.Price_Update ?
+                              {(typeof ed.Price_Update === 'string' || typeof ed.Price_Update === 'number') ?
                                 new Date(ed.Price_Update).toLocaleString() :
                                 <span className="text-muted-foreground">-</span>
                               }

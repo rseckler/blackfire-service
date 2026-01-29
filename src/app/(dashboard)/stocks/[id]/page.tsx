@@ -152,7 +152,7 @@ export default function CompanyDetailPage() {
                 </div>
               )}
             </div>
-            {ed.Price_Update && (
+            {(typeof ed.Price_Update === 'string' || typeof ed.Price_Update === 'number') && (
               <div className="mt-4 text-sm text-muted-foreground">
                 Last updated: {new Date(ed.Price_Update).toLocaleString()}
               </div>
