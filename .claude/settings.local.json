@@ -30,7 +30,8 @@
       "Bash(export PATH=\"/Users/robin/Library/Application Support/com.raycast.macos/NodeJS/runtime/22.14.0/bin:$PATH\")",
       "Bash(export PATH=\"/opt/homebrew/bin:/usr/local/bin:$PATH\")",
       "Bash(npx shadcn@latest add table:*)",
-      "Bash(grep:*)"
+      "Bash(grep:*)",
+      "Bash(npm run build:*)"
     ]
   }
 }
