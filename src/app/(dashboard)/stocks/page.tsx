@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -35,6 +36,7 @@ interface CompaniesResponse {
 }
 
 export default function StocksPage() {
+  const router = useRouter()
   const [companies, setCompanies] = useState<Company[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -211,7 +213,11 @@ export default function StocksPage() {
                       {companies.map((company) => {
                         const ed = company.extra_data || {}
                         return (
-                          <TableRow key={company.id}>
+                          <TableRow
+                            key={company.id}
+                            className="cursor-pointer"
+                            onClick={() => router.push(`/stocks/${company.id}`)}
+                          >
                             {/* Core Fields */}
                             <TableCell className="sticky left-0 bg-background z-10 font-medium">
                               {company.name}
