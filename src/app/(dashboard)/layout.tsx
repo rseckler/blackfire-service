@@ -1,17 +1,52 @@
-import { redirect } from 'next/navigation'
-import { getUser } from '@/lib/auth/session'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Sidebar } from '@/components/dashboard/sidebar'
 import { Header } from '@/components/dashboard/header'
+import type { AuthUser } from '@/lib/auth/types'
 
-export default async function DashboardLayout({
+export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  const user = await getUser()
+  const router = useRouter()
+  const [user, setUser] = useState<AuthUser | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+
+      console.log('Dashboard layout - checking session:', session)
+
+      if (!session) {
+        console.log('No session, redirecting to login')
+        router.push('/login')
+        return
+      }
+
+      console.log('Session found, user:', session.user)
+      setUser(session.user)
+      setLoading(false)
+    }
+
+    checkUser()
+  }, [router])
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <div className="text-lg">Loading...</div>
+      </div>
+    )
+  }
 
   if (!user) {
-    redirect('/login')
+    return null
   }
 
   return (
