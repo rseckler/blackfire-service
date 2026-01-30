@@ -20,7 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy scripts and environment
 COPY scripts/ ./scripts/
-COPY .env.production .env.production
+# Copy .env.production if it exists (optional for local builds)
+COPY .env.production* ./ 2>/dev/null || true
 
 # Make scripts executable
 RUN chmod +x scripts/*.py scripts/*.sh 2>/dev/null || true
