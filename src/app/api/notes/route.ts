@@ -5,15 +5,12 @@ import { createNote, getCompanyNotes } from '@/lib/services/notes-service'
 /**
  * GET /api/notes?companyId=XXX
  * Get all notes for a company (user's private + all shared)
+ * If not logged in, returns only shared notes
  */
 export async function GET(request: NextRequest) {
   try {
     const supabase = await createClient()
-    const { data: { user }, error: authError } = await supabase.auth.getUser()
-
-    if (authError || !user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
+    const { data: { user } } = await supabase.auth.getUser()
 
     const { searchParams } = new URL(request.url)
     const companyId = searchParams.get('companyId')
@@ -22,8 +19,27 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'companyId is required' }, { status: 400 })
     }
 
-    const notes = await getCompanyNotes(companyId, user.id)
-    return NextResponse.json({ notes })
+    // If user is logged in, get their private notes + all shared notes
+    // If not logged in, get only shared notes
+    if (user) {
+      const notes = await getCompanyNotes(companyId, user.id)
+      return NextResponse.json({ notes })
+    } else {
+      // Get only shared notes for non-authenticated users
+      const { data: notes, error } = await supabase
+        .from('notes')
+        .select('*')
+        .eq('entity_type', 'company')
+        .eq('entity_id', companyId)
+        .eq('is_private', false)
+        .order('created_at', { ascending: false })
+
+      if (error) {
+        throw error
+      }
+
+      return NextResponse.json({ notes: notes || [] })
+    }
   } catch (error) {
     console.error('Error in GET /api/notes:', error)
     return NextResponse.json(

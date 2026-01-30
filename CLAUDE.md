@@ -2,6 +2,45 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## 🚨 IMPORTANT: Deployment Setup
+
+**CRITICAL: Always deploy to Vercel, NOT to local or VPS for testing!**
+
+### Primary Deployment Platform: Vercel ✅
+
+**Production URL**: https://blackfire-service.vercel.app
+
+**Deployment Process**:
+1. Make changes locally
+2. Commit to Git: `git add -A && git commit -m "message"`
+3. Push to GitHub: `git push origin main`
+4. Vercel auto-deploys (2-3 minutes)
+5. Test at: https://blackfire-service.vercel.app
+
+**DO NOT**:
+- ❌ Test on `localhost:3000` (local dev often has issues)
+- ❌ Deploy to VPS unless specifically requested
+- ❌ Assume local = production
+
+**Database**: Supabase (always production, shared across all environments)
+- URL: https://lglvuiuwbrhiqvxcriwa.supabase.co
+- Migrations: Apply via Supabase Dashboard SQL Editor
+
+**After every feature implementation**:
+1. Git commit + push to GitHub
+2. Wait for Vercel deployment (check https://vercel.com/dashboard)
+3. Test on Vercel URL (https://blackfire-service.vercel.app)
+4. Share Vercel URL with user, NOT localhost
+
+### VPS (Secondary, backup only)
+
+**IP**: 72.62.148.205
+**URL**: http://72.62.148.205:3000
+**Use only when**: Vercel is down or user specifically requests VPS deployment
+**Process Manager**: PM2
+
+---
+
 ## Project Overview
 
 Blackfire_service is a web application for stock investment analysis and portfolio management, inspired by simplywall.st and theinformation.com. The service aims to identify high-growth potential stocks, including companies approaching IPO and undervalued stocks with recovery potential.

@@ -9,11 +9,12 @@ import { Plus } from 'lucide-react'
 
 interface NotesGridProps {
   notes: Note[]
-  userId: string
+  userId?: string
   onCreateNote: () => void
   onEditNote: (note: Note) => void
   onDeleteNote: (noteId: string) => void
   availableTags: string[]
+  isLoggedIn?: boolean
 }
 
 export function NotesGrid({
@@ -23,6 +24,7 @@ export function NotesGrid({
   onEditNote,
   onDeleteNote,
   availableTags,
+  isLoggedIn = false,
 }: NotesGridProps) {
   const [filters, setFilters] = useState<NoteFilters>({
     tags: [],
@@ -49,7 +51,7 @@ export function NotesGrid({
 
     // Filter by visibility
     if (filters.visibility === 'private') {
-      filtered = filtered.filter((note) => note.user_id === userId && note.is_private)
+      filtered = filtered.filter((note) => userId && note.user_id === userId && note.is_private)
     } else if (filters.visibility === 'shared') {
       filtered = filtered.filter((note) => !note.is_private)
     }
@@ -81,12 +83,15 @@ export function NotesGrid({
           <p className="text-sm text-muted-foreground">
             {filteredNotes.length} {filteredNotes.length === 1 ? 'note' : 'notes'}
             {notes.length !== filteredNotes.length && ` (${notes.length} total)`}
+            {!isLoggedIn && notes.length > 0 && ' (shared)'}
           </p>
         </div>
-        <Button onClick={onCreateNote} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Note
-        </Button>
+        {isLoggedIn && (
+          <Button onClick={onCreateNote} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Add Note
+          </Button>
+        )}
       </div>
 
       {/* Filters */}
@@ -101,14 +106,21 @@ export function NotesGrid({
         <div className="text-center py-12 border rounded-md bg-muted/20">
           <p className="text-muted-foreground mb-4">
             {notes.length === 0
-              ? 'No notes yet. Create your first note to get started!'
+              ? isLoggedIn
+                ? 'No notes yet. Create your first note to get started!'
+                : 'No shared notes available for this company.'
               : 'No notes match your filters.'}
           </p>
-          {notes.length === 0 && (
+          {notes.length === 0 && isLoggedIn && (
             <Button onClick={onCreateNote} variant="outline" className="gap-2">
               <Plus className="h-4 w-4" />
               Create your first note
             </Button>
+          )}
+          {!isLoggedIn && notes.length === 0 && (
+            <p className="text-sm text-muted-foreground">
+              Log in to create and view notes.
+            </p>
           )}
         </div>
       ) : (
@@ -119,7 +131,7 @@ export function NotesGrid({
               note={note}
               onEdit={onEditNote}
               onDelete={onDeleteNote}
-              isOwner={note.user_id === userId}
+              isOwner={userId ? note.user_id === userId : false}
             />
           ))}
         </div>

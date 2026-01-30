@@ -67,7 +67,11 @@
       "Bash(/tmp/update-service.exp)",
       "Bash(/tmp/run-update.exp)",
       "Bash(/tmp/simple-update.exp)",
-      "Bash(npm run migrate:info-fields:*)"
+      "Bash(npm run migrate:info-fields:*)",
+      "Bash(ssh -o StrictHostKeyChecking=no -o ConnectTimeout=10 root@72.62.148.205 'echo \"\"✅ SSH connection successful\"\"; ls -la /root/blackfire-service 2>/dev/null | head -5 || echo \"\"❌ App directory not found\"\"')",
+      "Bash(rsync:*)",
+      "Bash(scp .env.local root@72.62.148.205:/root/blackfire-service/.env.production)",
+      "Bash(ssh:*)"
     ]
   }
 }

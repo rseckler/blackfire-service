@@ -78,42 +78,30 @@ export function CompanyNotesSection({ companyId }: CompanyNotesSectionProps) {
     )
   }
 
-  if (!userId) {
-    return (
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Notes</h2>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-12 text-muted-foreground">
-            <p>Please log in to view and create notes.</p>
-          </div>
-        </CardContent>
-      </Card>
-    )
-  }
-
   return (
     <>
       <Card>
         <CardContent className="pt-6">
           <NotesGrid
             notes={notes}
-            userId={userId}
-            onCreateNote={handleCreateNote}
+            userId={userId || undefined}
+            onCreateNote={userId ? handleCreateNote : () => {}}
             onEditNote={handleEditNote}
             onDeleteNote={handleDeleteNote}
             availableTags={availableTags}
+            isLoggedIn={!!userId}
           />
         </CardContent>
       </Card>
 
-      <NoteDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        companyId={companyId}
-        note={selectedNote}
-      />
+      {userId && (
+        <NoteDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          companyId={companyId}
+          note={selectedNote}
+        />
+      )}
     </>
   )
 }
