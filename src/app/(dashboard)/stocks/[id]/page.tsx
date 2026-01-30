@@ -9,6 +9,7 @@ import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { WatchlistButton } from '@/components/watchlist/watchlist-button'
 import { StockPriceChart } from '@/components/charts/stock-price-chart'
+import { CompanyNotesSection } from '@/components/notes/company-notes-section'
 
 interface Company {
   id: string
@@ -172,6 +173,9 @@ export default function CompanyDetailPage() {
         />
       )}
 
+      {/* Company Notes Section */}
+      <CompanyNotesSection companyId={company.id} />
+
       {/* Profile */}
       {typeof ed.Profile === 'string' && (
         <Card>
@@ -290,42 +294,6 @@ export default function CompanyDetailPage() {
             <CardTitle>Additional Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            {ed.Info1 && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Info 1</span>
-                  <span className="font-medium">{ed.Info1}</span>
-                </div>
-                <Separator />
-              </>
-            )}
-            {ed.Info2 && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Info 2</span>
-                  <span className="font-medium">{ed.Info2}</span>
-                </div>
-                <Separator />
-              </>
-            )}
-            {ed.Info3 && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Info 3</span>
-                  <span className="font-medium">{ed.Info3}</span>
-                </div>
-                <Separator />
-              </>
-            )}
-            {ed.Info5 && (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Info 5</span>
-                  <span className="font-medium">{ed.Info5}</span>
-                </div>
-                <Separator />
-              </>
-            )}
             <div className="flex justify-between">
               <span className="text-muted-foreground">Source</span>
               <span className="font-medium">{formatValue(ed.Source)}</span>
