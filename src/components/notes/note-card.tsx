@@ -37,7 +37,7 @@ const PRIORITY_CONFIG = {
 export function NoteCard({ note, onEdit, onDelete, isOwner }: NoteCardProps) {
   const priorityConfig = PRIORITY_CONFIG[note.priority as keyof typeof PRIORITY_CONFIG]
   const PriorityIcon = priorityConfig.icon
-  const contentPreview = truncateText(stripHtml(note.content), 150)
+  const contentPreview = truncateText(stripHtml(note.content), 300)
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation()

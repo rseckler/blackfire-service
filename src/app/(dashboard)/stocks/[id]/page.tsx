@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, AlertCircle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { WatchlistButton } from '@/components/watchlist/watchlist-button'
 import { StockPriceChart } from '@/components/charts/stock-price-chart'
@@ -163,14 +163,26 @@ export default function CompanyDetailPage() {
         </Card>
       )}
 
-      {/* Interactive Stock Price Chart */}
-      {company.symbol && (
+      {/* ========================================
+          CRITICAL: Stock Price Chart Section
+          DO NOT REMOVE - User requires this chart
+          ======================================== */}
+      {company.symbol ? (
         <StockPriceChart
           companyId={company.id}
           symbol={company.symbol}
           companyName={company.name}
           currency={typeof ed.Currency === 'string' ? ed.Currency : 'USD'}
         />
+      ) : (
+        <Card>
+          <CardContent className="py-8">
+            <div className="text-center text-muted-foreground">
+              <AlertCircle className="mx-auto mb-2 h-8 w-8" />
+              <p>Stock chart unavailable - no symbol found for {company.name}</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Company Notes Section */}
