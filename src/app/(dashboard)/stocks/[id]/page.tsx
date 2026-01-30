@@ -8,6 +8,7 @@ import { Separator } from '@/components/ui/separator'
 import { ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { WatchlistButton } from '@/components/watchlist/watchlist-button'
+import { StockPriceChart } from '@/components/charts/stock-price-chart'
 
 interface Company {
   id: string
@@ -159,6 +160,16 @@ export default function CompanyDetailPage() {
             )}
           </CardContent>
         </Card>
+      )}
+
+      {/* Interactive Stock Price Chart */}
+      {company.symbol && (
+        <StockPriceChart
+          companyId={company.id}
+          symbol={company.symbol}
+          companyName={company.name}
+          currency={typeof ed.Currency === 'string' ? ed.Currency : 'USD'}
+        />
       )}
 
       {/* Profile */}
