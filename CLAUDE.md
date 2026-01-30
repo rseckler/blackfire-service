@@ -41,6 +41,103 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ---
 
+## 📝 Notes System (COMPLETED ✅)
+
+**Status**: Fully implemented and deployed to Vercel (2026-01-30)
+
+### Overview
+Rich-text notes system replacing limited Info1-Info5 fields with unlimited, formatted notes on company detail pages.
+
+### Implementation Details
+
+**Database Schema** (`notes` table):
+- `id` (UUID) - Primary key
+- `user_id` (UUID) - References auth.users
+- `entity_type` (TEXT) - 'company', 'sector', 'basket', 'general'
+- `entity_id` (UUID) - Company/entity ID
+- `title` (TEXT) - Note title (optional)
+- `content` (TEXT) - Rich HTML content from TipTap
+- `tags` (TEXT[]) - Array of tags
+- `is_private` (BOOLEAN) - Private (only creator) or Shared (all users)
+- `priority` (INTEGER) - 0=Normal, 1=Low, 2=Medium, 3=High
+- `reminder_date` (TIMESTAMPTZ) - Optional reminder date
+- `migrated_from` (TEXT) - Tracks migration from Info1-Info5 fields
+- `created_at`, `updated_at` (TIMESTAMPTZ)
+
+**RLS Policies** (Row Level Security):
+```sql
+-- Anyone can read shared notes
+CREATE POLICY "Anyone can read shared notes" ON notes FOR SELECT
+USING (is_private = false);
+
+-- Users can read their own notes
+CREATE POLICY "Users can read their own notes" ON notes FOR SELECT
+USING (auth.uid() = user_id);
+```
+
+**Technology Stack**:
+- **Rich-text editor**: TipTap (with extensions for bold, italic, underline, colors, highlight, headings, lists, alignment)
+- **Form management**: react-hook-form + zod
+- **Data fetching**: React Query (@tanstack/react-query)
+- **UI Components**: Radix UI (Dialog, Select, Calendar, Popover)
+
+**Key Components**:
+- `src/components/notes/company-notes-section.tsx` - Main container
+- `src/components/notes/notes-grid.tsx` - Card grid layout with filters
+- `src/components/notes/note-card.tsx` - Individual note display (300 char preview)
+- `src/components/notes/note-dialog.tsx` - Create/edit modal with full form
+- `src/components/notes/note-editor.tsx` - TipTap rich-text editor
+- `src/components/notes/note-filters.tsx` - Filter/sort controls
+- `src/components/notes/hooks/use-notes.ts` - React Query hooks
+
+**API Routes**:
+- `GET /api/notes?companyId=X` - Get notes (shared for non-auth, private+shared for auth users)
+- `POST /api/notes` - Create note (auth required)
+- `PATCH /api/notes/[id]` - Update note (auth required)
+- `DELETE /api/notes/[id]` - Delete note (auth required)
+- `GET /api/notes/tags?companyId=X` - Get unique tags
+
+**Features**:
+- ✅ Unlimited notes per company (not limited to 5)
+- ✅ Rich-text formatting (bold, italic, underline, colors, highlight, headings, lists)
+- ✅ Card grid interface with edit dialogs
+- ✅ Individual note editing with full formatting toolbar
+- ✅ Migration from Info1-Info5 to editable notes (with "Migrated" tag)
+- ✅ Privacy toggle: Private (only owner) OR Shared (all users)
+- ✅ Tags for categorization (autocomplete from existing tags)
+- ✅ Priority levels (None, Low, Medium, High with visual indicators)
+- ✅ Reminder dates (optional, with date picker)
+- ✅ Filter by tags, priority, visibility
+- ✅ Sort by date, priority, title
+- ✅ Non-authenticated users can view shared notes
+- ✅ Text preview: 300 characters per note card
+
+**Location on Detail Page**:
+- Position: After StockPriceChart, before Profile card
+- File: `src/app/(dashboard)/stocks/[id]/page.tsx` (line 177)
+
+**Important Scripts**:
+- `scripts/migrate-info-fields.ts` - Migrate Info1-Info5 to notes (ONLY run ONCE per company)
+- `scripts/check-duplicate-notes.ts` - Check for duplicate notes
+- `scripts/delete-duplicate-notes.ts` - Delete duplicate notes
+- `scripts/check-rls-policies.ts` - Verify RLS policies work correctly
+
+**Known Issues & Solutions**:
+1. **Duplicates**: Migration script was run twice → Fixed by delete-duplicate-notes.ts
+2. **RLS blocking shared notes**: Fixed by adding "Anyone can read shared notes" policy
+3. **401 errors for non-auth users**: Fixed by allowing GET requests without authentication for shared notes
+
+**Future Enhancements** (not implemented):
+- Full-text search across note content
+- Export notes to markdown/PDF
+- Bulk operations
+- Note attachments (images, files)
+- Note history/versioning
+- Email reminders for reminder_date
+- Collaborative editing
+
+---
+
 ## Project Overview
 
 Blackfire_service is a web application for stock investment analysis and portfolio management, inspired by simplywall.st and theinformation.com. The service aims to identify high-growth potential stocks, including companies approaching IPO and undervalued stocks with recovery potential.
@@ -308,19 +405,21 @@ Since this is a new project without existing code, prioritize:
 
 1. ✅ **Analyze Simply Wall St features and functionality** (COMPLETED - see docs/simplywall-st-analysis.md)
 2. ✅ **Evaluate Notion vs. alternatives** (COMPLETED - see docs/data-source-evaluation.md)
-3. ✅ **Define technology stack** (COMPLETED - VPS self-hosted for €0 additional costs)
-4. ✅ **Create project structure** (COMPLETED - Docker-based deployment ready)
-5. Define detailed feature specifications based on Simply Wall St analysis
-6. Database schema design supporting growing per-company information, notes, and information sources
-7. Data ingestion pipeline from PostgreSQL (self-hosted)
-8. External API integrations for stock data (Alpha Vantage free tier)
-9. Core stock overview and detail page implementations
-10. Interactive chart components (informed by Simply Wall St patterns)
-11. Information source registry and monitoring system
-12. Notes management system (native + optional Notion integration)
+3. ✅ **Define technology stack** (COMPLETED - Next.js + Supabase + Vercel)
+4. ✅ **Create project structure** (COMPLETED - Vercel + Docker backup)
+5. ✅ **Database schema design** (COMPLETED - PostgreSQL via Supabase)
+6. ✅ **Core stock detail page implementations** (COMPLETED - 2026-01-30)
+7. ✅ **External API integrations for stock data** (COMPLETED - Alpha Vantage)
+8. ✅ **Interactive chart components** (COMPLETED - lightweight-charts)
+9. ✅ **Notes management system** (COMPLETED - TipTap rich-text editor)
+10. 🔄 **Stock overview/list page** with filtering and sorting
+11. 🔄 **Data ingestion pipeline** from Excel/Dropbox
+12. 🔄 **User authentication** (NextAuth.js)
 13. Portfolio management features
-14. Notification system
-15. Admin backend with source management tools
+14. Watchlist enhancements (notifications, price alerts)
+15. Information source registry and monitoring system
+16. Notification system
+17. Admin backend with source management tools
 
 ### Implementation Phases
 
@@ -341,22 +440,38 @@ Since this is a new project without existing code, prioritize:
   - Functionality: Populates `symbol` field from extra_data, WKN, ISIN
   - Container: blackfire-cron (Docker)
   - Documentation: SYMBOL-POPULATION.md
+- ✅ **Stock Price Charts** - Interactive TradingView-style charts
+  - Deployed: 2026-01-30
+  - Library: lightweight-charts@4.2.3
+  - API: Alpha Vantage (free tier)
+  - Timeframes: 1D, 1W, 1M, 3M, 6M, 1Y, ALL
+  - Location: Company detail pages (after price card, before notes)
+  - Components: src/components/charts/stock-price-chart.tsx
+- ✅ **Notes System** - Rich-text notes replacing Info1-Info5
+  - Deployed: 2026-01-30
+  - See "Notes System (COMPLETED)" section above for full details
+  - Location: Company detail pages (after chart, before profile)
+  - Features: Rich-text editing, tags, priority, privacy, reminders
+- ✅ Basic stock overview and detail pages
 - 🔄 Data ingestion pipeline from Excel/Dropbox (scheduled every 12 hours)
-- 🔄 Basic stock overview and detail pages
 - 🔄 Live price data integration (scheduled hourly during market hours)
+- 🔄 User authentication (NextAuth.js)
+- 🔄 Watchlist functionality
 
 **Phase 2: Information Management**
 - Information source registry and management UI
 - RSS/feed aggregation
 - Basic web scraping for select sources
 - Content archiving system
-- Native quick notes functionality
 
 **Phase 3: Advanced Knowledge Management**
-- Rich text editor for notes with markdown support
-- Tagging and linking system
-- Full-text search implementation
-- AI-powered content summarization
+- Full-text search across notes (Elasticsearch/MeiliSearch)
+- Export notes to markdown/PDF
+- Bulk note operations
+- Note attachments (images, files)
+- Note history/versioning
+- AI-powered content summarization of notes
+- Email reminders for reminder_date
 - Notion integration for long-form notes (if hybrid approach)
 
 **Phase 4: Social & Multimedia**
@@ -430,13 +545,11 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
 
 ## Current Status
 
-**Project Stage**: MVP Development - Services Deployed
+**Project Stage**: MVP Development - Core Features Deployed
 
-**Completed:**
+**Completed (2026-01-30):**
 - ✅ Research & Architecture (Phase 0)
 - ✅ Technology stack defined
-- ✅ VPS deployment configuration (Hostinger VPS)
-- ✅ Docker setup with multi-container architecture
 - ✅ Database schema designed (PostgreSQL + Supabase)
 - ✅ Cost optimization (€0 additional vs €172K/year with Notion)
 - ✅ **Symbol Population Service** - Deployed and Running
@@ -444,28 +557,47 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
   - Runs every 4 hours via cron
   - Sources: extra_data (Company Symbol, Ticker), WKN, ISIN
   - Success rate: ~67% (2/3 symbols found in test)
-- ✅ VPS Deployment Infrastructure
-  - Docker containers running on production VPS
-  - Automated cron jobs for data processing
-  - Supabase integration configured
+- ✅ **Stock Price Charts** - Interactive TradingView-style charts
+  - Library: lightweight-charts@4.2.3
+  - API: Alpha Vantage (free tier, API key: OQC14NN6ENR1LFZD)
+  - Multiple timeframes: 1D, 1W, 1M, 3M, 6M, 1Y, ALL
+  - Caching: Multi-layer (Redis → PostgreSQL → API)
+  - Location: Company detail pages (line 167-185)
+  - **CRITICAL**: DO NOT REMOVE - marked with prominent comment
+- ✅ **Notes System** - Rich-text notes on company pages
+  - Replaced Info1-Info5 with unlimited notes
+  - Rich-text editor: TipTap with full formatting
+  - Features: Tags, priority, privacy, reminders
+  - Text preview: 300 characters per card
+  - Migration: Info1-Info5 data migrated to editable notes
+  - RLS policies: Shared notes visible to all, private to owner only
+  - No duplicates: Verified and cleaned (2026-01-30)
+- ✅ Company detail pages with full data display
+- ✅ Watchlist functionality
 
 **Currently Running Services:**
-1. **Symbol Population Cron** (blackfire-cron container)
+1. **Vercel Production** (PRIMARY)
+   - URL: https://blackfire-service.vercel.app
+   - Auto-deploys on git push to main
+   - Status: ✅ Live and functional
+
+2. **Symbol Population Cron** (VPS backup)
    - Schedule: Every 4 hours
    - Status: ✅ Live and functional
    - Last test: 2026-01-30, Success rate 66.7%
 
 **Next Steps:**
-1. ~~Deploy to VPS~~ ✅ COMPLETED
-2. Implement authentication (NextAuth.js)
-3. Build stock list page with populated symbols
-4. Integrate stock data API (Alpha Vantage free tier)
-5. Create portfolio management
-6. Deploy full application stack (app, worker, nginx)
+1. ~~Stock price charts~~ ✅ COMPLETED
+2. ~~Notes system~~ ✅ COMPLETED
+3. Implement authentication (NextAuth.js) - IN PROGRESS
+4. Build stock list/overview page with filtering
+5. Data ingestion pipeline from Excel/Dropbox
+6. Portfolio management features
+7. User dashboard
 
 **Deployment:**
-- Platform: Hostinger VPS (self-hosted)
-- Server IP: 72.62.148.205
-- Cost: €0 additional monthly costs
-- Status: ✅ Cron services deployed and running
-- Upgrade Path: Defined migration to cloud when needed
+- **Primary Platform**: Vercel (https://blackfire-service.vercel.app)
+- **Database**: Supabase (https://lglvuiuwbrhiqvxcriwa.supabase.co)
+- **Backup VPS**: Hostinger (72.62.148.205:3000)
+- **Cost**: €0 additional monthly costs (Vercel free tier, Supabase free tier)
+- **Process**: Git push → Vercel auto-deploy → Test on Vercel URL
