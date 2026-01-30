@@ -46,7 +46,7 @@ class SymbolPopulationService:
             'total_companies': 0,
             'missing_symbols': 0,
             'symbols_populated': 0,
-            'symbols_skipped': 0,
+            'skipped': 0,
             'errors': 0
         }
 
