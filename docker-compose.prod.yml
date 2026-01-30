@@ -135,6 +135,28 @@ services:
     networks:
       - blackfire-network
 
+  # Cron Service (Python-based scheduled tasks)
+  cron:
+    build:
+      context: .
+      dockerfile: Dockerfile.cron
+    image: blackfire-cron:latest
+    container_name: blackfire-cron
+    restart: unless-stopped
+    env_file:
+      - .env.production
+    environment:
+      DATABASE_URL: postgresql://blackfire_user:${DB_PASSWORD}@postgres:5432/blackfire
+      NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - blackfire-network
+    volumes:
+      - cron_logs:/var/log/blackfire
+
   # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
@@ -172,4 +194,6 @@ volumes:
   meilisearch_data:
     driver: local
   uploads:
+    driver: local
+  cron_logs:
     driver: local

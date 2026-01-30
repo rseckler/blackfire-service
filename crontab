@@ -1,0 +1,23 @@
+# Blackfire Cron Jobs
+# Runs symbol population and other scheduled tasks
+
+# Environment variables (loaded from .env.production)
+SHELL=/bin/bash
+PATH=/usr/local/bin:/usr/bin:/bin
+
+# Symbol Population Service - Runs every 4 hours
+0 */4 * * * cd /app && python3 scripts/populate_symbols.py >> /var/log/blackfire/cron.log 2>&1
+
+# Alternative: Run every 6 hours (at 00:00, 06:00, 12:00, 18:00)
+# 0 0,6,12,18 * * * cd /app && python3 scripts/populate_symbols.py >> /var/log/blackfire/cron.log 2>&1
+
+# Alternative: Run 3 times daily (at 08:00, 14:00, 20:00)
+# 0 8,14,20 * * * cd /app && python3 scripts/populate_symbols.py >> /var/log/blackfire/cron.log 2>&1
+
+# Excel to PostgreSQL Sync - Runs every 12 hours
+0 */12 * * * cd /app && python3 scripts/sync_excel_to_postgres.py >> /var/log/blackfire/cron.log 2>&1
+
+# Stock Price Updates - Runs every hour during market hours (9-17 UTC)
+0 9-17 * * 1-5 cd /app && python3 scripts/update_stock_prices.py >> /var/log/blackfire/cron.log 2>&1
+
+# Blank line required at end of crontab
