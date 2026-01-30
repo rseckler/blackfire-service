@@ -18,10 +18,11 @@ COPY requirements.txt .
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy scripts and environment
+# Copy scripts
 COPY scripts/ ./scripts/
-# Copy .env.production if it exists (optional for local builds)
-COPY .env.production* ./ 2>/dev/null || true
+
+# Note: .env.production is not copied into the image.
+# Environment variables should be provided via docker-compose environment section.
 
 # Make scripts executable
 RUN chmod +x scripts/*.py scripts/*.sh 2>/dev/null || true
