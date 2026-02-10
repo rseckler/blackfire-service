@@ -20,8 +20,8 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv(os.path.join(os.path.dirname(__file__), '../.env.local'))
 load_dotenv(os.path.join(os.path.dirname(__file__), '../.env.production'))
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env.local'))
 
 try:
     from supabase import create_client, Client

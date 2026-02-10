@@ -15,6 +15,7 @@ import sys
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env.production'))
 load_dotenv(os.path.join(os.path.dirname(__file__), '../.env.local'))
 
 try:

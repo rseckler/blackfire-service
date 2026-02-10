@@ -17,6 +17,7 @@ import sys
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+load_dotenv(os.path.join(os.path.dirname(__file__), '../.env.production'))
 load_dotenv(os.path.join(os.path.dirname(__file__), '../.env.local'))
 
 try:
@@ -144,13 +145,14 @@ class ExcelToPostgresSync:
         """Map Excel column to PostgreSQL field"""
         return COLUMN_MAPPING.get(excel_col, excel_col)
 
-    def build_company_data(self, excel_row, identifier):
+    def build_company_data(self, excel_row, identifier, satellog_value):
         """Build company data for PostgreSQL"""
 
         # Start with core fields
+        # Use raw satellog value from Excel (matches Notion import format)
         company_data = {
             'name': identifier,
-            'satellog': f'excel_{identifier.lower().replace(" ", "_")}'
+            'satellog': str(satellog_value).strip() if satellog_value and str(satellog_value) != 'nan' else identifier
         }
 
         # Extra data for JSONB field
@@ -189,24 +191,56 @@ class ExcelToPostgresSync:
         """Compare Excel with PostgreSQL and sync"""
         print("\n🔍 Comparing Excel with PostgreSQL...")
 
-        # Use first column as identifier (usually Company_Name or Name)
-        identifier_col = df.columns[0]
-        print(f"   Using '{identifier_col}' as identifier")
+        # Detect columns
+        identifier_col = df.columns[0]  # First column = satellog (used as identifier)
+        satellog_col = None
+
+        # Check if there's an explicit 'satellog' column
+        for col in df.columns:
+            if col.lower() == 'satellog':
+                satellog_col = col
+                break
+
+        # If first column IS satellog, use Name/Company_Name as display name
+        if satellog_col and satellog_col == identifier_col:
+            # satellog is first column - look for a Name column
+            name_col = None
+            for col in df.columns:
+                if col in ('Name', 'Company_Name', 'name'):
+                    name_col = col
+                    break
+            print(f"   Satellog column: '{satellog_col}'")
+            print(f"   Name column: '{name_col or identifier_col}'")
+        else:
+            name_col = None
+            print(f"   Using '{identifier_col}' as identifier (no separate satellog column)")
 
         to_update = []
         to_create = []
 
         for idx, row in df.iterrows():
-            identifier = str(row[identifier_col]).strip()
+            # Get the raw satellog value
+            if satellog_col:
+                satellog_value = str(row[satellog_col]).strip()
+            else:
+                satellog_value = str(row[identifier_col]).strip()
 
-            if not identifier or identifier == 'nan':
+            # Get display name
+            if name_col:
+                identifier = str(row[name_col]).strip()
+                if not identifier or identifier == 'nan':
+                    identifier = satellog_value
+            else:
+                identifier = satellog_value
+
+            if not satellog_value or satellog_value == 'nan':
                 self.stats['skipped'] += 1
                 continue
 
-            # Check if company exists
-            existing_company = existing['by_name'].get(identifier) or existing['by_satellog'].get(f'excel_{identifier.lower().replace(" ", "_")}')
+            # Check if company exists - match by satellog (raw value) or name
+            existing_company = existing['by_satellog'].get(satellog_value) or existing['by_name'].get(identifier)
 
-            company_data = self.build_company_data(row.to_dict(), identifier)
+            company_data = self.build_company_data(row.to_dict(), identifier, satellog_value)
 
             if existing_company:
                 # Update existing
@@ -256,6 +290,7 @@ class ExcelToPostgresSync:
                 data['extra_data'] = self.merge_extra_data(data['extra_data'], existing_extra)
 
             try:
+                data['last_synced_at'] = datetime.now().isoformat()
                 self.supabase.table('companies').update(data).eq('id', company_id).execute()
                 success += 1
 
