@@ -113,10 +113,25 @@ class ExcelToPostgresSync:
         print("\n🐘 Getting existing companies from PostgreSQL...")
 
         try:
-            # Fetch all companies
-            response = self.supabase.table('companies').select('id, name, satellog, symbol, wkn, isin, extra_data').execute()
+            # Fetch all companies (paginate past Supabase 1000-row default limit)
+            all_companies = []
+            page_size = 1000
+            offset = 0
 
-            companies = response.data
+            while True:
+                response = self.supabase.table('companies') \
+                    .select('id, name, satellog, symbol, wkn, isin, extra_data') \
+                    .range(offset, offset + page_size - 1) \
+                    .execute()
+
+                batch = response.data
+                all_companies.extend(batch)
+
+                if len(batch) < page_size:
+                    break
+                offset += page_size
+
+            companies = all_companies
             self.stats['db_companies'] = len(companies)
 
             print(f"   ✅ Found {len(companies)} companies in database")
@@ -126,8 +141,8 @@ class ExcelToPostgresSync:
             by_satellog = {}
 
             for company in companies:
-                name = company.get('name', '').strip()
-                satellog = company.get('satellog', '').strip()
+                name = (company.get('name') or '').strip()
+                satellog = (company.get('satellog') or '').strip()
 
                 if name:
                     by_name[name] = company
