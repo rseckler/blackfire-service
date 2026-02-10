@@ -47,6 +47,7 @@ export function useSpreadsheetColumns(extraDataFields: string[]) {
       maxSize: 40,
       enableSorting: false,
       enableHiding: false,
+      enableColumnFilter: false,
       cell: ({ row }) => (
         <span className="text-[10px] text-slate-400">{row.index + 1}</span>
       ),
@@ -60,6 +61,7 @@ export function useSpreadsheetColumns(extraDataFields: string[]) {
       size: 220,
       minSize: 120,
       enableHiding: false,
+      filterFn: 'includesString',
       cell: ({ getValue }) => (
         <span className="font-medium">{String(getValue() ?? '')}</span>
       ),
@@ -71,6 +73,7 @@ export function useSpreadsheetColumns(extraDataFields: string[]) {
       header: 'Symbol',
       size: 80,
       minSize: 60,
+      filterFn: 'includesString',
       cell: ({ getValue }) => renderCell('symbol', getValue() as string | null),
     } as ColumnDef<Company, unknown>)
 
@@ -80,6 +83,7 @@ export function useSpreadsheetColumns(extraDataFields: string[]) {
       header: 'WKN',
       size: 80,
       minSize: 60,
+      filterFn: 'includesString',
       cell: ({ getValue }) => renderCell('wkn', getValue() as string | null),
     } as ColumnDef<Company, unknown>)
 
@@ -89,6 +93,7 @@ export function useSpreadsheetColumns(extraDataFields: string[]) {
       header: 'ISIN',
       size: 120,
       minSize: 80,
+      filterFn: 'includesString',
       cell: ({ getValue }) => renderCell('isin', getValue() as string | null),
     } as ColumnDef<Company, unknown>)
 
@@ -104,6 +109,7 @@ export function useSpreadsheetColumns(extraDataFields: string[]) {
         size: isLongText ? 250 : numeric ? 100 : 130,
         minSize: 60,
         meta: { extraDataField: field, numeric },
+        filterFn: 'includesString',
         cell: ({ getValue }) =>
           renderCell(
             field,

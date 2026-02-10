@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { NotesGrid } from './notes-grid'
 import { NoteDialog } from './note-dialog'
+import { NoteViewDialog } from './note-view-dialog'
 import { useCompanyNotes, useNoteTags } from './hooks/use-notes'
 import { Note } from '@/lib/services/notes-service'
 import { Loader2 } from 'lucide-react'
@@ -16,6 +17,8 @@ interface CompanyNotesSectionProps {
 export function CompanyNotesSection({ companyId }: CompanyNotesSectionProps) {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [selectedNote, setSelectedNote] = useState<Note | null>(null)
+  const [viewDialogOpen, setViewDialogOpen] = useState(false)
+  const [viewNote, setViewNote] = useState<Note | null>(null)
   const [userId, setUserId] = useState<string | null>(null)
 
   const { data: notes = [], isLoading, error } = useCompanyNotes(companyId)
@@ -39,6 +42,17 @@ export function CompanyNotesSection({ companyId }: CompanyNotesSectionProps) {
   }
 
   const handleEditNote = (note: Note) => {
+    setSelectedNote(note)
+    setDialogOpen(true)
+  }
+
+  const handleViewNote = (note: Note) => {
+    setViewNote(note)
+    setViewDialogOpen(true)
+  }
+
+  const handleEditFromView = (note: Note) => {
+    setViewDialogOpen(false)
     setSelectedNote(note)
     setDialogOpen(true)
   }
@@ -87,12 +101,21 @@ export function CompanyNotesSection({ companyId }: CompanyNotesSectionProps) {
             userId={userId || undefined}
             onCreateNote={userId ? handleCreateNote : () => {}}
             onEditNote={handleEditNote}
+            onViewNote={handleViewNote}
             onDeleteNote={handleDeleteNote}
             availableTags={availableTags}
             isLoggedIn={!!userId}
           />
         </CardContent>
       </Card>
+
+      <NoteViewDialog
+        open={viewDialogOpen}
+        onOpenChange={setViewDialogOpen}
+        note={viewNote}
+        isOwner={viewNote ? userId === viewNote.user_id : false}
+        onEdit={handleEditFromView}
+      />
 
       {userId && (
         <NoteDialog

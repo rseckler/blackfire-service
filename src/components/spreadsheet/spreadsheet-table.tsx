@@ -1,6 +1,6 @@
 'use client'
 
-import { type Table, flexRender } from '@tanstack/react-table'
+import { type Table, type ColumnFiltersState, flexRender } from '@tanstack/react-table'
 import { ArrowUp, ArrowDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
@@ -23,6 +23,8 @@ interface SpreadsheetTableProps {
   sortOrder: 'asc' | 'desc'
   onRowClick: (id: string) => void
   loading: boolean
+  columnFilters: ColumnFiltersState
+  onColumnFilterChange: (columnId: string, value: string) => void
 }
 
 /** Maps our column ids back to the API sort key */
@@ -38,6 +40,8 @@ export function SpreadsheetTable({
   sortOrder,
   onRowClick,
   loading,
+  columnFilters,
+  onColumnFilterChange,
 }: SpreadsheetTableProps) {
   if (loading) {
     return (
@@ -56,13 +60,15 @@ export function SpreadsheetTable({
     )
   }
 
+  const hasActiveFilters = columnFilters.length > 0
+
   return (
     <div className="h-full overflow-auto">
       <table className="w-full border-collapse text-xs">
         <thead className="sticky top-0 z-20">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id}>
-              {headerGroup.headers.map((header, colIndex) => {
+              {headerGroup.headers.map((header) => {
                 const sortKey = columnIdToSortKey(header.column.id)
                 const isSorted = sortBy === sortKey
                 const canSort = header.column.getCanSort()
@@ -110,6 +116,51 @@ export function SpreadsheetTable({
               })}
             </tr>
           ))}
+          {/* Filter row */}
+          <tr>
+            {table.getHeaderGroups()[0]?.headers.map((header) => {
+              const isRowNum = header.column.id === '_row'
+              const isName = header.column.id === 'name'
+              const canFilter = header.column.getCanFilter()
+              const meta = header.column.columnDef.meta as
+                | { numeric?: boolean }
+                | undefined
+              const filterValue =
+                (columnFilters.find((f) => f.id === header.column.id)
+                  ?.value as string) ?? ''
+
+              return (
+                <th
+                  key={`filter-${header.id}`}
+                  className={cn(
+                    'border-b border-r border-slate-200 bg-slate-50 px-1 py-0.5',
+                    isRowNum && 'sticky left-0 z-30 w-10 min-w-[40px] bg-slate-50',
+                    isName &&
+                      'sticky left-10 z-30 min-w-[120px] bg-slate-50 shadow-[2px_0_4px_-2px_rgba(0,0,0,0.1)]'
+                  )}
+                  style={{ width: header.getSize() }}
+                >
+                  {canFilter ? (
+                    <input
+                      type="text"
+                      value={filterValue}
+                      onChange={(e) =>
+                        onColumnFilterChange(header.column.id, e.target.value)
+                      }
+                      placeholder="Filter..."
+                      className={cn(
+                        'w-full h-5 px-1 text-[10px] bg-white border border-slate-200 rounded-sm outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-200',
+                        meta?.numeric && 'text-right'
+                      )}
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                  ) : (
+                    <div className="h-5" />
+                  )}
+                </th>
+              )
+            })}
+          </tr>
         </thead>
         <tbody>
           {rows.map((row, rowIndex) => (

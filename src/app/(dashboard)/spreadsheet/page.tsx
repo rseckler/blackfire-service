@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation'
 import {
   useReactTable,
   getCoreRowModel,
+  getFilteredRowModel,
   type VisibilityState,
+  type ColumnFiltersState,
 } from '@tanstack/react-table'
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Search, ChevronLeft, ChevronRight, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useSpreadsheetColumns } from '@/components/spreadsheet/use-spreadsheet-columns'
@@ -49,6 +51,7 @@ export default function SpreadsheetPage() {
   const [extraDataFields, setExtraDataFields] = useState<string[]>([])
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [hasInitVisibility, setHasInitVisibility] = useState(false)
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
 
   const limit = showAll ? 10000 : 100
   const debounceRef = useRef<ReturnType<typeof setTimeout>>()
@@ -116,9 +119,11 @@ export default function SpreadsheetPage() {
   const table = useReactTable({
     data: companies,
     columns,
-    state: { columnVisibility },
+    state: { columnVisibility, columnFilters },
     onColumnVisibilityChange: setColumnVisibility,
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
     manualSorting: true,
     manualPagination: true,
     pageCount: totalPages,
@@ -138,6 +143,24 @@ export default function SpreadsheetPage() {
     router.push(`/stocks/${id}`)
   }
 
+  const handleColumnFilterChange = (columnId: string, value: string) => {
+    setColumnFilters((prev) => {
+      const existing = prev.filter((f) => f.id !== columnId)
+      if (value) {
+        return [...existing, { id: columnId, value }]
+      }
+      return existing
+    })
+  }
+
+  const clearAllFilters = () => {
+    setColumnFilters([])
+  }
+
+  const filteredRowCount = table.getFilteredRowModel().rows.length
+  const totalRowCount = companies.length
+  const hasActiveFilters = columnFilters.length > 0
+
   return (
     <div className="-m-6 flex h-[calc(100vh-4rem)] flex-col">
       {/* Toolbar */}
@@ -156,12 +179,27 @@ export default function SpreadsheetPage() {
         {/* Column visibility */}
         <ColumnVisibilityToggle table={table} />
 
+        {/* Clear filters button */}
+        {hasActiveFilters && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="h-7 text-xs gap-1"
+            onClick={clearAllFilters}
+          >
+            <X className="h-3 w-3" />
+            Clear Filters
+          </Button>
+        )}
+
         {/* Spacer */}
         <div className="flex-1" />
 
         {/* Row count */}
         <span className="text-xs text-slate-500">
-          {total.toLocaleString()} rows
+          {hasActiveFilters
+            ? `${filteredRowCount.toLocaleString()} of ${total.toLocaleString()} rows`
+            : `${total.toLocaleString()} rows`}
         </span>
 
         {/* View mode */}
@@ -214,15 +252,19 @@ export default function SpreadsheetPage() {
           sortOrder={sortOrder}
           onRowClick={handleRowClick}
           loading={loading}
+          columnFilters={columnFilters}
+          onColumnFilterChange={handleColumnFilterChange}
         />
       </div>
 
       {/* Status bar */}
       <div className="flex shrink-0 items-center justify-between border-t bg-slate-50 px-4 py-1 text-[10px] text-slate-500">
         <span>
-          {!showAll
-            ? `Showing ${Math.min((page - 1) * limit + 1, total)}-${Math.min(page * limit, total)} of ${total.toLocaleString()}`
-            : `Showing all ${companies.length.toLocaleString()} of ${total.toLocaleString()}`}
+          {hasActiveFilters
+            ? `Showing ${filteredRowCount.toLocaleString()} of ${totalRowCount.toLocaleString()} (${totalRowCount - filteredRowCount} filtered)`
+            : !showAll
+              ? `Showing ${Math.min((page - 1) * limit + 1, total)}-${Math.min(page * limit, total)} of ${total.toLocaleString()}`
+              : `Showing all ${companies.length.toLocaleString()} of ${total.toLocaleString()}`}
         </span>
         <span>
           {columns.length} columns ({table.getVisibleLeafColumns().length}{' '}

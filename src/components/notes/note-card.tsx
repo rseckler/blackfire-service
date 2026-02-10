@@ -23,6 +23,7 @@ import { format } from 'date-fns'
 interface NoteCardProps {
   note: Note
   onEdit: (note: Note) => void
+  onView: (note: Note) => void
   onDelete: (noteId: string) => void
   isOwner: boolean
 }
@@ -34,7 +35,7 @@ const PRIORITY_CONFIG = {
   3: { label: 'High', icon: ArrowUp, color: 'text-red-500' },
 } as const
 
-export function NoteCard({ note, onEdit, onDelete, isOwner }: NoteCardProps) {
+export function NoteCard({ note, onEdit, onView, onDelete, isOwner }: NoteCardProps) {
   const priorityConfig = PRIORITY_CONFIG[note.priority as keyof typeof PRIORITY_CONFIG]
   const PriorityIcon = priorityConfig.icon
   const contentPreview = truncateText(stripHtml(note.content), 300)
@@ -52,7 +53,7 @@ export function NoteCard({ note, onEdit, onDelete, isOwner }: NoteCardProps) {
         "cursor-pointer hover:shadow-md transition-shadow",
         !isOwner && "opacity-90"
       )}
-      onClick={() => isOwner && onEdit(note)}
+      onClick={() => onView(note)}
     >
       <CardContent className="p-4">
         {/* Header with title and actions */}

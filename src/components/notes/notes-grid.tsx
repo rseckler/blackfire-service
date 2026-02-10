@@ -12,6 +12,7 @@ interface NotesGridProps {
   userId?: string
   onCreateNote: () => void
   onEditNote: (note: Note) => void
+  onViewNote: (note: Note) => void
   onDeleteNote: (noteId: string) => void
   availableTags: string[]
   isLoggedIn?: boolean
@@ -22,6 +23,7 @@ export function NotesGrid({
   userId,
   onCreateNote,
   onEditNote,
+  onViewNote,
   onDeleteNote,
   availableTags,
   isLoggedIn = false,
@@ -130,6 +132,7 @@ export function NotesGrid({
               key={note.id}
               note={note}
               onEdit={onEditNote}
+              onView={onViewNote}
               onDelete={onDeleteNote}
               isOwner={userId ? note.user_id === userId : false}
             />
