@@ -82,11 +82,12 @@ USING (auth.uid() = user_id);
 - **UI Components**: Radix UI (Dialog, Select, Calendar, Popover)
 
 **Key Components**:
-- `src/components/notes/company-notes-section.tsx` - Main container
+- `src/components/notes/company-notes-section.tsx` - Main container (manages view + edit dialog state)
 - `src/components/notes/notes-grid.tsx` - Card grid layout with filters
-- `src/components/notes/note-card.tsx` - Individual note display (300 char preview)
+- `src/components/notes/note-card.tsx` - Individual note display (300 char preview, click opens view dialog)
+- `src/components/notes/note-view-dialog.tsx` - Read-only note view (all users can view, Edit button for owner)
 - `src/components/notes/note-dialog.tsx` - Create/edit modal with full form
-- `src/components/notes/note-editor.tsx` - TipTap rich-text editor
+- `src/components/notes/note-editor.tsx` - TipTap rich-text editor (supports `readOnly` prop)
 - `src/components/notes/note-filters.tsx` - Filter/sort controls
 - `src/components/notes/hooks/use-notes.ts` - React Query hooks
 
@@ -96,11 +97,13 @@ USING (auth.uid() = user_id);
 - `PATCH /api/notes/[id]` - Update note (auth required)
 - `DELETE /api/notes/[id]` - Delete note (auth required)
 - `GET /api/notes/tags?companyId=X` - Get unique tags
+- `GET /api/sync-status` - Dashboard sync status (last price update, company counts)
 
 **Features**:
 - ✅ Unlimited notes per company (not limited to 5)
 - ✅ Rich-text formatting (bold, italic, underline, colors, highlight, headings, lists)
-- ✅ Card grid interface with edit dialogs
+- ✅ Card grid interface with view + edit dialogs
+- ✅ Read-only note view dialog (click opens view for all users, Edit button for owner only)
 - ✅ Individual note editing with full formatting toolbar
 - ✅ Migration from Info1-Info5 to editable notes (with "Migrated" tag)
 - ✅ Privacy toggle: Private (only owner) OR Shared (all users)
@@ -135,6 +138,37 @@ USING (auth.uid() = user_id);
 - Note history/versioning
 - Email reminders for reminder_date
 - Collaborative editing
+
+---
+
+## 📊 Dashboard Sync-Status (COMPLETED ✅)
+
+**Status**: Implemented and deployed to Vercel (2026-02-10)
+
+### Overview
+Dashboard shows live sync status from Supabase instead of hardcoded placeholder values. Displays last price update time, total companies, and stocks with prices.
+
+### Implementation
+- **API Route**: `src/app/api/sync-status/route.ts` — Queries `companies` table for `MAX(extra_data->>'Price_Update')`, total count, and count with prices
+- **Dashboard Page**: `src/app/(dashboard)/dashboard/page.tsx` — Client component (`'use client'`) with `useEffect` fetch
+- **Cards**: 4 existing stat cards + new "Last Sync" card (relative time via `date-fns` `formatDistanceToNow`)
+- **System Status**: Replaced "Recent Activity" placeholder with live system status (Last Price Update, Total Companies, Stocks with Prices percentage)
+
+---
+
+## 📋 Spreadsheet Column Filters (COMPLETED ✅)
+
+**Status**: Implemented and deployed to Vercel (2026-02-10)
+
+### Overview
+Excel-style column filtering on the spreadsheet page. Filter inputs appear as a second header row under column names. Client-side filtering using TanStack Table's `getFilteredRowModel`.
+
+### Implementation
+- **Filter Row**: `src/components/spreadsheet/spreadsheet-table.tsx` — Second `<tr>` in `<thead>` with compact `<input>` per column
+- **Filter State**: `src/app/(dashboard)/spreadsheet/page.tsx` — `columnFilters` state + `getFilteredRowModel()`
+- **Column Config**: `src/components/spreadsheet/use-spreadsheet-columns.tsx` — `filterFn: 'includesString'` on all data columns
+- **UX**: "Clear Filters" button in toolbar when filters active, filtered row count in status bar
+- **Sticky columns**: Filter inputs respect same sticky positioning as headers (row number + name columns)
 
 ---
 
@@ -547,7 +581,7 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
 
 **Project Stage**: MVP Development - Core Features Deployed
 
-**Completed (2026-01-30):**
+**Completed (2026-01-30 — 2026-02-10):**
 - ✅ Research & Architecture (Phase 0)
 - ✅ Technology stack defined
 - ✅ Database schema designed (PostgreSQL + Supabase)
@@ -571,7 +605,14 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
   - Text preview: 300 characters per card
   - Migration: Info1-Info5 data migrated to editable notes
   - RLS policies: Shared notes visible to all, private to owner only
+  - Read-only view dialog: All users can view notes, Edit button for owner only
   - No duplicates: Verified and cleaned (2026-01-30)
+- ✅ **Dashboard Sync-Status** (2026-02-10)
+  - API route `/api/sync-status` queries live data from Supabase
+  - "Last Sync" card with relative time + "System Status" card
+- ✅ **Spreadsheet Column Filters** (2026-02-10)
+  - Client-side filtering via TanStack `getFilteredRowModel`
+  - Filter inputs in second header row, "Clear Filters" button
 - ✅ Company detail pages with full data display
 - ✅ Watchlist functionality
 
@@ -589,11 +630,11 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
 **Next Steps:**
 1. ~~Stock price charts~~ ✅ COMPLETED
 2. ~~Notes system~~ ✅ COMPLETED
-3. Implement authentication (NextAuth.js) - IN PROGRESS
-4. Build stock list/overview page with filtering
-5. Data ingestion pipeline from Excel/Dropbox
-6. Portfolio management features
-7. User dashboard
+3. ~~Dashboard sync status~~ ✅ COMPLETED
+4. ~~Spreadsheet column filters~~ ✅ COMPLETED
+5. Implement authentication (NextAuth.js) - IN PROGRESS
+6. Data ingestion pipeline from Excel/Dropbox
+7. Portfolio management features
 
 **Deployment:**
 - **Primary Platform**: Vercel (https://blackfire-service.vercel.app)
