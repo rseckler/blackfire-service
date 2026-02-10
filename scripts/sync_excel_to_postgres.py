@@ -178,8 +178,8 @@ class ExcelToPostgresSync:
             if pd.isna(value) or value == '':
                 continue
 
-            # Convert datetime objects to ISO strings for JSON serialization
-            if isinstance(value, (datetime, pd.Timestamp)):
+            # Convert date/time objects to ISO strings for JSON serialization
+            if hasattr(value, 'isoformat'):
                 value = value.isoformat()
 
             # Map column name
