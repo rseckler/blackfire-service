@@ -35,20 +35,19 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl
 
-  // If user is not signed in and trying to access protected routes
-  if (!user && pathname.startsWith('/dashboard')) {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/login'
-    redirectUrl.searchParams.set('redirectTo', pathname)
-    return NextResponse.redirect(redirectUrl)
-  }
-
-  // If user is signed in and trying to access auth pages
-  if (user && (pathname === '/login' || pathname === '/signup')) {
-    const redirectUrl = request.nextUrl.clone()
-    redirectUrl.pathname = '/dashboard'
-    return NextResponse.redirect(redirectUrl)
-  }
+  // Auth disabled — allow all routes without login
+  // TODO: Re-enable when auth is needed:
+  // if (!user && pathname.startsWith('/dashboard')) {
+  //   const redirectUrl = request.nextUrl.clone()
+  //   redirectUrl.pathname = '/login'
+  //   redirectUrl.searchParams.set('redirectTo', pathname)
+  //   return NextResponse.redirect(redirectUrl)
+  // }
+  // if (user && (pathname === '/login' || pathname === '/signup')) {
+  //   const redirectUrl = request.nextUrl.clone()
+  //   redirectUrl.pathname = '/dashboard'
+  //   return NextResponse.redirect(redirectUrl)
+  // }
 
   return supabaseResponse
 }

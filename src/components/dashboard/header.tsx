@@ -2,7 +2,7 @@ import { UserNav } from './user-nav'
 import type { AuthUser } from '@/lib/auth/types'
 
 interface HeaderProps {
-  user: AuthUser
+  user: AuthUser | null
 }
 
 export function Header({ user }: HeaderProps) {
@@ -11,11 +11,11 @@ export function Header({ user }: HeaderProps) {
       <div className="flex h-full items-center justify-between px-6">
         <div className="flex items-center space-x-4">
           <h1 className="text-xl font-semibold text-slate-900">
-            Welcome back!
+            Blackfire Service
           </h1>
         </div>
         <div className="flex items-center space-x-4">
-          <UserNav user={user} />
+          {user ? <UserNav user={user} /> : null}
         </div>
       </div>
     </header>
