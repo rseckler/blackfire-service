@@ -31,19 +31,12 @@ if [ ! -f "$APP_DIR/.env.production" ]; then
     exit 1
 fi
 
-# Check required env vars
-source_env() {
-    set -a
-    . "$APP_DIR/.env.production"
-    set +a
-}
-source_env
-
+# Check required env vars (use grep to avoid shell issues with & in URLs)
 missing=""
-[ -z "$NEXT_PUBLIC_SUPABASE_URL" ] && missing="$missing NEXT_PUBLIC_SUPABASE_URL"
-[ -z "$SUPABASE_SERVICE_ROLE_KEY" ] && missing="$missing SUPABASE_SERVICE_ROLE_KEY"
-[ -z "$DROPBOX_URL" ] && missing="$missing DROPBOX_URL"
-[ -z "$ALPHA_VANTAGE_API_KEY" ] && missing="$missing ALPHA_VANTAGE_API_KEY"
+grep -q "^NEXT_PUBLIC_SUPABASE_URL=" "$APP_DIR/.env.production" || missing="$missing NEXT_PUBLIC_SUPABASE_URL"
+grep -q "^SUPABASE_SERVICE_ROLE_KEY=" "$APP_DIR/.env.production" || missing="$missing SUPABASE_SERVICE_ROLE_KEY"
+grep -q "^DROPBOX_URL=" "$APP_DIR/.env.production" || missing="$missing DROPBOX_URL"
+grep -q "^ALPHA_VANTAGE_API_KEY=" "$APP_DIR/.env.production" || missing="$missing ALPHA_VANTAGE_API_KEY"
 
 if [ -n "$missing" ]; then
     echo -e "${RED}Missing env vars in .env.production:${NC}"
