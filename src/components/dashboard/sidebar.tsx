@@ -9,6 +9,7 @@ import {
   Star,
   TrendingUp,
   FileText,
+  Table2,
   Settings,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
@@ -33,6 +34,11 @@ const navigation = [
     name: 'Stocks',
     href: '/stocks',
     icon: TrendingUp,
+  },
+  {
+    name: 'Spreadsheet',
+    href: '/spreadsheet',
+    icon: Table2,
   },
   {
     name: 'Notes',
