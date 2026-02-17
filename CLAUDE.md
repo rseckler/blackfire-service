@@ -172,6 +172,46 @@ Excel-style column filtering on the spreadsheet page. Filter inputs appear as a 
 
 ---
 
+## 🎯 Buy Radar — Configurable Filters & Batched Cron (COMPLETED ✅)
+
+**Status**: Implemented and deployed to Vercel (2026-02-17)
+
+### Overview
+AI-powered buy timing analysis with configurable company filters. Replaced hardcoded RPC function (`get_buy_radar_companies`) with user-selectable Thier_Group and VIP filter dropdowns. Both filters use **AND logic** when combined. Cron job uses batching with self-re-invocation to process all 243+ companies.
+
+### API Routes
+- **`GET /api/buy-radar/filters`** — Returns distinct `Thier_Group` and `VIP` values with counts from companies table
+- **`GET /api/buy-radar?thierGroups=2026*,2026**&vipLevels=Defcon 1`** — Returns companies matching filters (AND logic). No filters = empty list. Fetches latest `buy_radar_analyses` per company via second query.
+- **`POST /api/buy-radar/analyze`** — Accepts `{ companyId?, thierGroups?, vipLevels? }`. Single company or bulk with filter-based selection.
+- **`GET /api/cron/buy-radar?offset=0`** — Batched cron job. Processes companies in parallel sub-batches of 5. Self-re-invokes with `?offset=N` when approaching 300s timeout. No auth check (Vercel internal).
+
+### Key Components
+- `src/components/buy-radar/radar-company-filters.tsx` — Popover dropdowns with checkboxes for Thier_Group and VIP, shows count per value, "Select all" / "Clear" controls
+- `src/components/buy-radar/hooks/use-buy-radar.ts` — `useBuyRadarFilters()` loads filter options, `useBuyRadarCompanies(thierGroups, vipLevels)` fetches filtered companies, `useAnalyzeCompany()` passes filters to analyze endpoint
+- `src/components/ui/checkbox.tsx` — Radix UI checkbox (dependency: `@radix-ui/react-checkbox`)
+
+### Filter Logic
+- **AND logic**: When both Thier_Group and VIP are set, company must match BOTH
+- **Single filter**: When only one is set, only that filter applies
+- **Default selection**: Thier_Group `['2026', '2026*', '2026**', '2026***']`, VIP empty
+- **No filters = empty list**: User must select at least one filter
+
+### Cron Batching
+- **Parallel sub-batches**: 5 companies analyzed concurrently per batch
+- **Timeout check**: Stops 30s before 300s limit, self-re-invokes with next offset
+- **Self-re-invocation**: `fetch()` to same endpoint with `?offset=N` (fire-and-forget)
+- **Default filter**: Thier_Group `['2026', '2026*', '2026**', '2026***']` (no VIP filter for cron)
+- **Performance**: ~135 companies per 300s batch, all 243 in ~2 batches (~7 minutes total)
+
+### Page Structure (`src/app/(dashboard)/buy-radar/page.tsx`)
+1. Header with "Refresh All" button (sends current filters to analyze endpoint)
+2. Company Filters bar (Thier_Group + VIP dropdowns) in bordered container
+3. Stats bar (Buy / Wait / Avoid / Pending counts)
+4. Recommendation tab filters (All / Buy / Wait / Avoid / Pending)
+5. Company card grid
+
+---
+
 ## Project Overview
 
 Blackfire_service is a web application for stock investment analysis and portfolio management, inspired by simplywall.st and theinformation.com. The service aims to identify high-growth potential stocks, including companies approaching IPO and undervalued stocks with recovery potential.
@@ -581,7 +621,7 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
 
 **Project Stage**: MVP Development - Core Features Deployed
 
-**Completed (2026-01-30 — 2026-02-10):**
+**Completed (2026-01-30 — 2026-02-17):**
 - ✅ Research & Architecture (Phase 0)
 - ✅ Technology stack defined
 - ✅ Database schema designed (PostgreSQL + Supabase)
@@ -613,6 +653,11 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
 - ✅ **Spreadsheet Column Filters** (2026-02-10)
   - Client-side filtering via TanStack `getFilteredRowModel`
   - Filter inputs in second header row, "Clear Filters" button
+- ✅ **Buy Radar Configurable Filters** (2026-02-17)
+  - Replaced hardcoded RPC with user-selectable Thier_Group + VIP dropdowns
+  - AND logic when both filters set, checkbox popover UI with counts
+  - Batched cron with parallel sub-batches of 5 + self-re-invocation
+  - 243 companies analyzed in ~7 minutes across 2 batches
 - ✅ Company detail pages with full data display
 - ✅ Watchlist functionality
 
@@ -622,7 +667,12 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
    - Auto-deploys on git push to main
    - Status: ✅ Live and functional
 
-2. **Symbol Population Cron** (VPS backup)
+2. **Buy Radar Cron** (Vercel)
+   - Schedule: Daily at 06:00 UTC
+   - Batched: ~135 companies/batch, self-re-invokes for remainder
+   - No auth check (runs via Vercel internal cron)
+
+3. **Symbol Population Cron** (VPS backup)
    - Schedule: Every 4 hours
    - Status: ✅ Live and functional
    - Last test: 2026-01-30, Success rate 66.7%
@@ -632,9 +682,10 @@ User Interface ← Search & Filter ← Notes System ← AI Analysis & Enrichment
 2. ~~Notes system~~ ✅ COMPLETED
 3. ~~Dashboard sync status~~ ✅ COMPLETED
 4. ~~Spreadsheet column filters~~ ✅ COMPLETED
-5. Implement authentication (NextAuth.js) - IN PROGRESS
-6. Data ingestion pipeline from Excel/Dropbox
-7. Portfolio management features
+5. ~~Buy Radar configurable filters~~ ✅ COMPLETED
+6. Implement authentication (NextAuth.js) - IN PROGRESS
+7. Data ingestion pipeline from Excel/Dropbox
+8. Portfolio management features
 
 **Deployment:**
 - **Primary Platform**: Vercel (https://blackfire-service.vercel.app)
