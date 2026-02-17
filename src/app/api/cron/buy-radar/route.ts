@@ -16,13 +16,6 @@ const TIMEOUT_BUFFER_MS = 30_000 // stop 30s before max timeout
  * Protected by CRON_SECRET.
  */
 export async function GET(request: NextRequest) {
-  // Verify: Vercel cron sends Bearer token, manual dashboard trigger sends x-vercel-cron header
-  const authHeader = request.headers.get('authorization')
-  const isVercelCron = authHeader === `Bearer ${process.env.CRON_SECRET}`
-  const isVercelInternal = request.headers.get('x-vercel-cron') === '1'
-  if (!isVercelCron && !isVercelInternal) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-  }
 
   const startTime = Date.now()
   const offset = parseInt(request.nextUrl.searchParams.get('offset') || '0', 10)
@@ -69,9 +62,8 @@ export async function GET(request: NextRequest) {
         const baseUrl = request.nextUrl.origin
         console.log(`Cron: Timeout approaching at ${elapsed}ms, re-invoking with offset=${nextOffset}`)
 
-        fetch(`${baseUrl}/api/cron/buy-radar?offset=${nextOffset}`, {
-          headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
-        }).catch(err => console.error('Cron: Self-invocation failed:', err))
+        fetch(`${baseUrl}/api/cron/buy-radar?offset=${nextOffset}`)
+          .catch(err => console.error('Cron: Self-invocation failed:', err))
 
         const duration = Date.now() - startTime
         return NextResponse.json({
