@@ -33,6 +33,7 @@
     "prepare": "husky install"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
     "@auth/core": "^0.37.4",
     "@auth/drizzle-adapter": "^1.7.4",
     "@hookform/resolvers": "^3.10.0",

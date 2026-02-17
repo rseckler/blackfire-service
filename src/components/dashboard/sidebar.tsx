@@ -10,6 +10,7 @@ import {
   TrendingUp,
   FileText,
   Table2,
+  Crosshair,
   Settings,
 } from 'lucide-react'
 import { Separator } from '@/components/ui/separator'
@@ -34,6 +35,11 @@ const navigation = [
     name: 'Stocks',
     href: '/stocks',
     icon: TrendingUp,
+  },
+  {
+    name: 'Buy Radar',
+    href: '/buy-radar',
+    icon: Crosshair,
   },
   {
     name: 'Spreadsheet',
