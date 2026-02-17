@@ -16,8 +16,11 @@ const TIMEOUT_BUFFER_MS = 30_000 // stop 30s before max timeout
  * Protected by CRON_SECRET.
  */
 export async function GET(request: NextRequest) {
+  // Verify: Vercel cron sends Bearer token, manual dashboard trigger sends x-vercel-cron header
   const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const isVercelCron = authHeader === `Bearer ${process.env.CRON_SECRET}`
+  const isVercelInternal = request.headers.get('x-vercel-cron') === '1'
+  if (!isVercelCron && !isVercelInternal) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
