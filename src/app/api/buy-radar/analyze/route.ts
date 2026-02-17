@@ -16,7 +16,11 @@ export async function POST(request: NextRequest) {
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
     const body = await request.json().catch(() => ({}))
-    const { companyId } = body as { companyId?: string }
+    const { companyId, thierGroups, vipLevels } = body as {
+      companyId?: string
+      thierGroups?: string[]
+      vipLevels?: string[]
+    }
 
     const service = new BuyRadarService()
     const results: { companyId: string; companyName: string; recommendation: string; success: boolean; error?: string }[] = []
@@ -36,14 +40,29 @@ export async function POST(request: NextRequest) {
       const result = await analyzeAndStore(supabase, service, company)
       results.push(result)
     } else {
-      // Analyze all buy radar companies
-      const { data: companies, error } = await supabase
+      // Analyze buy radar companies with filters (AND logic)
+      const tg = thierGroups && thierGroups.length > 0
+        ? thierGroups
+        : ['2026', '2026*', '2026**', '2026***']
+      const vip = vipLevels && vipLevels.length > 0
+        ? vipLevels
+        : []
+
+      let companyQuery = supabase
         .from('companies')
         .select('id, name, symbol, extra_data')
-        .or(
-          'extra_data->>Thier_Group.in.(2026,2026*,2026**,2026***),' +
-          'extra_data->>VIP.eq.Defcon 1'
-        )
+
+      if (tg.length > 0 && vip.length > 0) {
+        companyQuery = companyQuery
+          .in('extra_data->>Thier_Group', tg)
+          .in('extra_data->>VIP', vip)
+      } else if (tg.length > 0) {
+        companyQuery = companyQuery.in('extra_data->>Thier_Group', tg)
+      } else {
+        companyQuery = companyQuery.in('extra_data->>VIP', vip)
+      }
+
+      const { data: companies, error } = await companyQuery
 
       if (error) {
         return NextResponse.json({ error: error.message }, { status: 500 })

@@ -3,18 +3,28 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Loader2, RefreshCw, Crosshair } from 'lucide-react'
-import { useBuyRadarCompanies, useAnalyzeCompany } from '@/components/buy-radar/hooks/use-buy-radar'
+import { useBuyRadarCompanies, useBuyRadarFilters, useAnalyzeCompany } from '@/components/buy-radar/hooks/use-buy-radar'
 import { RadarCard } from '@/components/buy-radar/radar-card'
 import { RadarFilters, type RadarFilter } from '@/components/buy-radar/radar-filters'
+import { RadarCompanyFilters } from '@/components/buy-radar/radar-company-filters'
 import { RadarDetailDialog } from '@/components/buy-radar/radar-detail-dialog'
 import type { BuyRadarCompany } from '@/lib/services/buy-radar-service'
 
+const DEFAULT_THIER_GROUPS = ['2026', '2026*', '2026**', '2026***']
+
 export default function BuyRadarPage() {
-  const { data: companies, isLoading, error } = useBuyRadarCompanies()
-  const analyzeMutation = useAnalyzeCompany()
+  // Company filters (Thier_Group, VIP)
+  const [selectedThierGroups, setSelectedThierGroups] = useState<string[]>(DEFAULT_THIER_GROUPS)
+  const [selectedVipLevels, setSelectedVipLevels] = useState<string[]>([])
+
+  // Recommendation filter (buy/wait/avoid)
   const [filter, setFilter] = useState<RadarFilter>('all')
   const [selectedCompany, setSelectedCompany] = useState<BuyRadarCompany | null>(null)
   const [dialogOpen, setDialogOpen] = useState(false)
+
+  const { data: filterOptions, isLoading: filtersLoading } = useBuyRadarFilters()
+  const { data: companies, isLoading, error } = useBuyRadarCompanies(selectedThierGroups, selectedVipLevels)
+  const analyzeMutation = useAnalyzeCompany()
 
   const counts = {
     all: companies?.length ?? 0,
@@ -36,25 +46,13 @@ export default function BuyRadarPage() {
   }
 
   const handleRefreshAll = () => {
-    analyzeMutation.mutate(undefined)
+    analyzeMutation.mutate({
+      thierGroups: selectedThierGroups,
+      vipLevels: selectedVipLevels,
+    })
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex h-[600px] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex h-[600px] flex-col items-center justify-center space-y-4">
-        <p className="text-red-400">Failed to load Buy Radar data</p>
-        <p className="text-sm text-slate-500">{error.message}</p>
-      </div>
-    )
-  }
+  const hasFilters = selectedThierGroups.length > 0 || selectedVipLevels.length > 0
 
   return (
     <div className="space-y-6 p-6">
@@ -71,7 +69,7 @@ export default function BuyRadarPage() {
         </div>
         <Button
           onClick={handleRefreshAll}
-          disabled={analyzeMutation.isPending}
+          disabled={analyzeMutation.isPending || !hasFilters}
           className="bg-blue-600 hover:bg-blue-700"
         >
           {analyzeMutation.isPending ? (
@@ -88,32 +86,63 @@ export default function BuyRadarPage() {
         </Button>
       </div>
 
-      {/* Stats Bar */}
-      <div className="flex gap-4 text-sm">
-        <span className="text-green-400">{counts.buy} Buy</span>
-        <span className="text-yellow-400">{counts.wait} Wait</span>
-        <span className="text-red-400">{counts.avoid} Avoid</span>
-        <span className="text-slate-500">{counts.unanalyzed} Pending</span>
+      {/* Company Filters */}
+      <div className="rounded-lg border border-slate-800 bg-slate-900/50 p-4">
+        <RadarCompanyFilters
+          thierGroups={filterOptions?.thierGroups ?? []}
+          vipLevels={filterOptions?.vipLevels ?? []}
+          selectedThierGroups={selectedThierGroups}
+          selectedVipLevels={selectedVipLevels}
+          onThierGroupsChange={setSelectedThierGroups}
+          onVipLevelsChange={setSelectedVipLevels}
+          totalResults={companies?.length ?? 0}
+          isLoading={isLoading || filtersLoading}
+        />
       </div>
 
-      {/* Filters */}
-      <RadarFilters active={filter} onChange={setFilter} counts={counts} />
-
-      {/* Grid */}
-      {filtered.length === 0 ? (
+      {!hasFilters ? (
         <div className="flex h-40 items-center justify-center text-slate-500">
-          No companies match this filter
+          Select at least one filter to load companies
+        </div>
+      ) : isLoading ? (
+        <div className="flex h-[400px] items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
+        </div>
+      ) : error ? (
+        <div className="flex h-[400px] flex-col items-center justify-center space-y-4">
+          <p className="text-red-400">Failed to load Buy Radar data</p>
+          <p className="text-sm text-slate-500">{error.message}</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map(company => (
-            <RadarCard
-              key={company.company_id}
-              company={company}
-              onClick={() => handleCardClick(company)}
-            />
-          ))}
-        </div>
+        <>
+          {/* Stats Bar */}
+          <div className="flex gap-4 text-sm">
+            <span className="text-green-400">{counts.buy} Buy</span>
+            <span className="text-yellow-400">{counts.wait} Wait</span>
+            <span className="text-red-400">{counts.avoid} Avoid</span>
+            <span className="text-slate-500">{counts.unanalyzed} Pending</span>
+          </div>
+
+          {/* Recommendation Filters */}
+          <RadarFilters active={filter} onChange={setFilter} counts={counts} />
+
+          {/* Grid */}
+          {filtered.length === 0 ? (
+            <div className="flex h-40 items-center justify-center text-slate-500">
+              No companies match this filter
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {filtered.map(company => (
+                <RadarCard
+                  key={company.company_id}
+                  company={company}
+                  onClick={() => handleCardClick(company)}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {/* Detail Dialog */}

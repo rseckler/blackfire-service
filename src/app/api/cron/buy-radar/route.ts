@@ -23,14 +23,11 @@ export async function GET(request: NextRequest) {
   const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
   try {
-    // Fetch all buy radar companies
+    // Fetch all buy radar companies (default filters: Thier_Group 2026-2026***)
     const { data: companies, error } = await supabase
       .from('companies')
       .select('id, name, symbol, extra_data')
-      .or(
-        'extra_data->>Thier_Group.in.(2026,2026*,2026**,2026***),' +
-        'extra_data->>VIP.eq.Defcon 1'
-      )
+      .in('extra_data->>Thier_Group', ['2026', '2026*', '2026**', '2026***'])
 
     if (error) {
       console.error('Cron: Failed to fetch companies:', error)
